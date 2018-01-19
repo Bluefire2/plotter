@@ -192,9 +192,9 @@ class Chart extends Component {
         
         //make bar chart rectangle
         if (discreteVar) {
-            let mouseOutTimeout,
-                currI,
-                boxUp = false;
+            // let mouseOutTimeout,
+            //     currI,
+            //     boxUp = false;
             const handleMouseOver = (d, i) => {
                 // if (currI !== i || !boxUp) { // generate a box if either there is no box or there is one but it's over a different bar
                 //     console.log('generating box');
@@ -401,7 +401,7 @@ class Chart extends Component {
             const sigma = Math.sqrt(discreteVar.Var()),
                 mu = discreteVar.E(),
                 normalApprox = normalPDF(mu, sigma * sigma),
-                barWidth = (width / (maxX - minX)) / 2; // for now
+                barWidth = (width / (maxX - minX)) / 1.25; // for now
 
             svg.selectAll(".bar")
                 .data(discreteData)
@@ -589,7 +589,7 @@ class Chart extends Component {
 Chart.defaultProps = {
     chart: 'loading...',
     minX: 0,
-    maxX: 10,
+    maxX: 20,
     minY: 0,
     maxY: 1,
     lt: 0,

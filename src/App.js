@@ -16,6 +16,7 @@ class App extends Component {
                     To get started, edit <code>src/App.js</code> and save to reload.
                 </p>
                 <Chart width={1000} height={500}
+                       maxY={0.4}
                        discreteVar={"B(10, 0.2)"}
                     />
             </div>
