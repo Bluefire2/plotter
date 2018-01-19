@@ -35,7 +35,7 @@
   Bar chart styling
  */
 .bar {
-    fill: steelblue;
+    fill: orange;
 }
 
 .bar.tail {
@@ -43,7 +43,7 @@
 }
 
 .bar:hover {
-    fill: brown;
+    fill: orangered;
 }
 
 #popupDataText {
@@ -67,7 +67,7 @@
 }
 
 .axis {
-    font: 20px sans-serif;
+    font: 15px sans-serif;
 }
 
 .axis path, .axis line {
