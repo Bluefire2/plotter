@@ -4,7 +4,6 @@ import * as math from 'mathjs';
 import {withFauxDOM} from 'react-faux-dom';
 import {Normal, Poisson, Binomial, NBinomial, Geometric} from '../distributions';
 
-
 /**
  * Properties:
  *
@@ -109,6 +108,7 @@ class Chart extends Component {
                 return [xFn(elem.x), yFn(elem.y)];
             }).join(" ");
         }
+
         // TODO: make this return a promise that resolves when the graph is finished
         const discreteVar = parseVariable(this.props.discreteVar),
             contVar = parseVariable(this.props.contVar),
@@ -189,203 +189,25 @@ class Chart extends Component {
             .attr("text-anchor", "middle")
             .text("5.75");
         */
-        
+
         //make bar chart rectangle
         if (discreteVar) {
-            // let mouseOutTimeout,
-            //     currI,
-            //     boxUp = false;
+            const tip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
             const handleMouseOver = (d, i) => {
-                // if (currI !== i || !boxUp) { // generate a box if either there is no box or there is one but it's over a different bar
-                //     console.log('generating box');
-                //     svg.selectAll(".popupRect")
-                //         .remove();
-                //
-                //     clearTimeout(mouseOutTimeout); // just in case
-                //
-                //     currI = i;
-                //
-                //     const currX = i === 0 ? x(0) + barWidth / 2 : x(d.value),
-                //         currY = y(d.frequency),
-                //         fsize = 60,
-                //         boxWidth = 400,
-                //         boxHeight = 100,
-                //         boxX = currX - boxWidth / 2,
-                //         boxY = currY - (boxHeight + 30),
-                //         aRectWidth = boxWidth / 20; // for now
-                //
-                //     // callout rectangle
-                //     console.log(svg)
-                //     svg.select('g').append("rect")
-                //         .attr({
-                //             x: boxX,
-                //             y: boxY, // for now
-                //             fill: "lightblue",
-                //             width: boxWidth,
-                //             height: boxHeight,
-                //             id: "popupRectMain",
-                //             "class": "popupRect"
-                //         });
-                //
-                //     // callout triangle to complete the shape
-                //     svg.append("polygon")
-                //         .attr({
-                //             points: [[boxX + boxWidth / 2 + 10, boxY + boxHeight - 1], [boxX + boxWidth / 2 - 10, boxY + boxHeight - 1], [boxX + boxWidth / 2, boxY + boxHeight + 15 - 1]].map(function (elem, index) {
-                //                 return elem.join(",");
-                //             }).join(" "),
-                //             fill: "lightblue",
-                //             "class": "popupRect"
-                //         });
-                //
-                //     // variable data text
-                //     svg.append("text")
-                //         .text(function () {
-                //             return round3DP(d.frequency);
-                //         })
-                //         .attr({
-                //             x: boxX + boxWidth / 2,
-                //             y: boxY + boxHeight / 2,
-                //             dy: "0.35em",
-                //             id: "popupDataText",
-                //             "class": "popupRect",
-                //             "font-family": "Arial White",
-                //             "font-size": fsize,
-                //             "text-anchor": "middle"
-                //         });
-                //
-                //     // callout selection arrows
-                //     svg.append("polygon")
-                //         .attr({
-                //             points: [[boxX + 20, boxY + boxHeight / 2], [boxX + 60, boxY + 20], [boxX + 60, boxY + boxHeight - 20]].map(function (elem, index) {
-                //                 return elem.join(",");
-                //             }).join(" "),
-                //             fill: "steelblue",
-                //             id: "leftArrow",
-                //             "class": "popupArrow popupRect"
-                //         });
-                //
-                //     svg.append("polygon")
-                //         .attr({
-                //             points: [[boxX + boxWidth - 20, boxY + boxHeight / 2], [boxX + boxWidth - 60, boxY + 20], [boxX + boxWidth - 60, boxY + boxHeight - 20]].map(function (elem, index) {
-                //                 return elem.join(",");
-                //             }).join(" "),
-                //             fill: "steelblue",
-                //             id: "rightArrow",
-                //             "class": "popupArrow popupRect"
-                //         });
-                //
-                //     svg.append("rect")
-                //         .attr({
-                //             width: aRectWidth,
-                //             height: boxHeight - 40,
-                //             x: boxX + 70,
-                //             y: boxY + 20,
-                //             fill: "steelblue",
-                //             id: "leftArrowIncl",
-                //             "class": "popupArrow popupRect"
-                //         });
-                //
-                //     svg.append("rect")
-                //         .attr({
-                //             width: aRectWidth,
-                //             height: boxHeight - 40,
-                //             x: boxX + boxWidth - (70 + aRectWidth),
-                //             y: boxY + 20,
-                //             fill: "steelblue",
-                //             id: "rightArrowIncl",
-                //             "class": "popupArrow popupRect"
-                //         });
-                //
-                //     svg.selectAll(".popupArrow")
-                //         .on("mouseover.arrowHover", function () {
-                //             const text = d3.select(faux).select(svg).select("#popupDataText"),
-                //                 currText = d.frequency,
-                //                 bars = d3.select(faux).select(svg).selectAll(".bar"),
-                //                 arrow = d3.select(this),
-                //                 incl = arrow.attr("id").indexOf("Incl") !== -1,
-                //                 tailDirection = arrow.attr("id").indexOf("rightArrow") !== -1 ? "right" : "left",
-                //                 summationFn = tailDirection === "right" ? sumRight : sumLeft;
-                //             let startingBarIndex, tail;
-                //
-                //             arrow.attr("fill", "brown");
-                //
-                //             if (incl) {
-                //                 d3.select(faux).select(svg).select("#" + tailDirection + "Arrow")
-                //                     .attr("fill", "brown");
-                //             }
-                //
-                //             if (tailDirection === "right") {
-                //                 bars.each(function (datum, index) {
-                //                     const elem = d3.select(this);
-                //
-                //                     startingBarIndex = incl ? i : i + 1;
-                //
-                //                     if (index < startingBarIndex) {
-                //                         elem.classed("tail", false); // just in case
-                //                         return false;
-                //                     } else {
-                //                         elem.classed("tail", true);
-                //                     }
-                //                 });
-                //             } else {
-                //                 bars.each(function (datum, index) {
-                //                     const elem = d3.select(this);
-                //
-                //                     startingBarIndex = incl ? i : i - 1;
-                //
-                //                     if (index > startingBarIndex) {
-                //                         elem.classed("tail", false); // just in case
-                //                         return false;
-                //                     } else {
-                //                         elem.classed("tail", true);
-                //                     }
-                //                 });
-                //             }
-                //
-                //             tail = summationFn(discreteData, startingBarIndex, function (elem) {
-                //                 return elem.frequency;
-                //             });
-                //
-                //             text.text(function () {
-                //                 return round3DP(tail);
-                //             });
-                //         })
-                //         .on("mouseout.arrowHover", function () {
-                //             const text = d3.select(faux).select(svg).select("#popupDataText"),
-                //                 arrow = d3.select(faux).select(svg).selectAll(".popupArrow");
-                //
-                //             arrow.attr("fill", "steelblue");
-                //             d3.select(faux).select(svg).selectAll(".bar")
-                //                 .classed("tail", false);
-                //
-                //             text.text(function () {
-                //                 return round3DP(d.frequency);
-                //             });
-                //         });
-                //
-                //     svg.selectAll(".popupRect")
-                //         .on("mouseover.mainHover", function () {
-                //             clearTimeout(mouseOutTimeout);
-                //             boxUp = true;
-                //         })
-                //         .on("mouseout.mainHover", function () {
-                //                 mouseOutTimeout = setTimeout(function () {
-                //                     svg.select(faux).select(svg).selectAll(".popupRect")
-                //                         .remove();
-                //                     boxUp = false;
-                //                 }, 500);
-                //         });
-                // } else {
-                //     clearTimeout(mouseOutTimeout);
-                //     boxUp = true;
-                // }
+                tip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tip.html(`P(X = ${d.value}) = ${round3DP(d.frequency)}`)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
             };
             const handleMouseOut = (d, i) => {
-                // mouseOutTimeout = setTimeout(function () {
-                //     svg.selectAll(".popupRect")
-                //         .remove();
-                //     boxUp = false;
-                // }, 500);
+                tip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
             };
 
             const minOrZero = minX < 0 ? 0 : minX,
@@ -424,14 +246,14 @@ class Chart extends Component {
                     return height - y(d.frequency);
                 });
 
+            svg.selectAll(".bar")
+                .on("mouseover", handleMouseOver)
+                .on("mouseout", handleMouseOut);
+
             // make the first bar half as wide to accomodate the y-axis
             svg.select(".bar")
                 .attr("width", barWidth / 2)
                 .attr("transform", "translate(" + barWidth / 2 + ", 0)");
-
-            svg.selectAll(".bar")
-                .on("mouseover", handleMouseOver)
-                .on("mouseout", handleMouseOut);
         }
 
         const makeLineFunction = (line, formulae, colors, xDomain, x, y, tails, tailsZ, tailsY) => {
