@@ -1,28 +1,87 @@
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+    animation: App-logo-spin infinite 20s linear;
+    height: 80px;
 }
 
 .App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+    background-color: #222;
+    height: 150px;
+    padding: 20px;
+    color: white;
 }
 
 .App-title {
-  font-size: 1.5em;
+    font-size: 1.5em;
 }
 
 .App-intro {
-  font-size: large;
+    font-size: large;
 }
 
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/*
+  Bar chart styling
+ */
+.bar {
+    fill: steelblue;
+}
+
+.bar.tail {
+    fill: brown;
+}
+
+.bar:hover {
+    fill: brown;
+}
+
+#popupDataText {
+    font-family: monospace;
+}
+
+#discreteLabel {
+    color: steelblue;
+}
+
+#contLabel {
+    color: red;
+}
+
+#PDFLabel {
+    color: green;
+}
+
+#CDFLabel {
+    color: purple;
+}
+
+.axis {
+    font: 20px sans-serif;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.line {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px; /* I haven't managed to figure out how to make the tail-shading polygon have curved edges like the line, so this is the workaround... */
+}
+
+.x.axis path {
+    display: none;
 }
