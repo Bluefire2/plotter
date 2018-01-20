@@ -181,18 +181,11 @@ class Chart extends Component {
             .style("text-anchor", "end")
             .text("Probability/density");
 
-        /* critical region testing stuff
-        svg.append("text")
-            .attr("x", x(5.75))
-            .attr("y", y(0))
-            .attr("dy", ".71em")
-            .attr("text-anchor", "middle")
-            .text("5.75");
-        */
-
         //make bar chart rectangle
         if (discreteVar) {
-            const tip = d3.select("body").append("div")
+            // tooltip div
+            // I don't really want to append to body but it only works this way if I do
+            const tip = d3.select('body').append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
@@ -203,6 +196,7 @@ class Chart extends Component {
                 tip.html(`P(X = ${d.value}) = ${round3DP(d.frequency)}`)
                     .style("left", (d3.event.pageX) + "px")
                     .style("top", (d3.event.pageY - 28) + "px");
+                console.log(d3.event.pageX, d3.event.pageY);
             };
             const handleMouseOut = (d, i) => {
                 tip.transition()
@@ -233,12 +227,12 @@ class Chart extends Component {
                     return x(d.value) - barWidth / 2;
                 })
                 .attr("width", barWidth)
-                .attr("y", function (d) {
-                    return y(0);
-                })
-                .attr("height", 0)
-                .transition()
-                .duration(500)
+                // .attr("y", function (d) {
+                //     return y(0);
+                // })
+                // .attr("height", 0)
+                // .transition()
+                // .duration(500)
                 .attr("y", function (d) {
                     return y(d.frequency);
                 })
