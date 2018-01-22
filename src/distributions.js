@@ -100,7 +100,7 @@ export function Normal(m, s2, CC) {
         return (1 + erf(x / Math.sqrt(2))) / 2;
     }
 
-    this.PDF = "1/(" + Math.sqrt(variance) + "*sqrt(2*pi)) * exp(-(x-" + mean + ")^2/(2*" + variance + "))";
+    this.PDFformula = "1/(" + Math.sqrt(variance) + "*sqrt(2*pi)) * exp(-(x-" + mean + ")^2/(2*" + variance + "))";
 
     this.E = function () {
         return mean;
