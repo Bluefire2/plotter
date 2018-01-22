@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import * as d3 from 'd3';
 import * as math from 'mathjs';
+import * as _ from 'lodash';
 import {withFauxDOM} from 'react-faux-dom';
 import {Normal, Poisson, Binomial, NBinomial, Geometric} from '../distributions';
 
@@ -9,9 +10,7 @@ import {Normal, Poisson, Binomial, NBinomial, Geometric} from '../distributions'
  *
  * width
  * height
- * discreteVar
- * contVar
- * pdfVar
+ * variables
  * minX
  * maxX
  * minY
@@ -40,6 +39,7 @@ class Chart extends Component {
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY, lt = 0, rt = 1) {
+        const self = this;
         // function type(d) {
         //     d.frequency = +d.frequency;
         //     return d;
@@ -61,11 +61,22 @@ class Chart extends Component {
                 }); // with readability in mind :)
                 distribution = text.split("(")[0];
             } catch (e) {
-                // oops
-                return false;
+                // not a standard distribution
+                // assume it's a PDF
+                return text;
             }
             params.unshift(null);
             return typeof ref[distribution] === "undefined" ? false : (new (Function.prototype.bind.apply(ref[distribution], params)));
+        }
+
+        function variableIsDiscrete(variable) {
+            // TODO: rewrite the entire distributions spec to make all variables extend a superclass
+            if (typeof variable === 'string') {
+                // PDF variable
+                return false;
+            } else {
+                return variable.isDiscrete;
+            }
         }
 
         function normalPDF(mean, variance) {
@@ -109,10 +120,51 @@ class Chart extends Component {
             }).join(" ");
         }
 
-        // TODO: make this return a promise that resolves when the graph is finished
         const discreteVar = parseVariable(this.props.discreteVar),
             contVar = parseVariable(this.props.contVar),
             PDF = this.props.pdfVar;
+
+        // parse all the variables, and assign them colours
+
+        const colors = [
+            {
+                default: 'orange',
+                hover: 'orangered'
+            },
+            {
+                default: 'green',
+                hover: 'lightgreen'
+            },
+            {
+                default: 'blue',
+                hover: 'lightblue'
+            }
+        ];
+        const discreteVariables = {},
+            continuousVariables = {};
+
+        let count = 0,
+            discreteVariablesCount = 0,
+            continuousVariablesCount = 0;
+        _.forOwn(this.props.variables, (value, key) => {
+            const variable = parseVariable(value);
+            let obj;
+
+            if (variableIsDiscrete(variable)) {
+                obj = discreteVariables;
+                discreteVariablesCount++;
+            } else {
+                obj = continuousVariables;
+                continuousVariablesCount++;
+            }
+
+            obj[key] = {
+                variable: parseVariable(value),
+                color: count % colors.length
+            };
+
+            count++;
+        });
 
         const faux = this.faux,
             fnColors = { // probably don't even need this lol
@@ -121,9 +173,7 @@ class Chart extends Component {
                 "CDF": "purple"
             };
 
-        let tails,
-            tailsZ,
-            tailsY;
+        let tails, tailsZ, tailsY;
         if (contVar) {
             tails = [lt, rt];
             tailsZ = tails.map(elem => {
@@ -134,6 +184,7 @@ class Chart extends Component {
             });
         }
 
+        // make the x- and y-axes
         const xDomain = [minX, maxX],
             yDomain = [minY, maxY];
 
@@ -147,11 +198,12 @@ class Chart extends Component {
             .ticks(maxX - minX);
 
         const yAxis = d3.axisLeft(y);
-        //define x and y
+
+        // define x and y
         x.domain(xDomain);
         y.domain(yDomain);
 
-        //line function
+        // line function, for continuous variables
         const line = d3.line()
             .x(function (d) {
                 return x(d.x);
@@ -164,12 +216,13 @@ class Chart extends Component {
         svg.selectAll("*").remove(); // clear current chart
 
 
-        //make x axis
+        // draw the x axis
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0, " + y(0) + ")")
             .call(xAxis);
-        //make y axis
+
+        // draw the y axis
         svg.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate(" + x(0) + ", 0)")
@@ -181,73 +234,117 @@ class Chart extends Component {
             .style("text-anchor", "end")
             .text("Probability/density");
 
-        //make bar chart rectangle
-        if (discreteVar) {
+        // make bar chart rectangles
+        // only do this if we have discrete variables:
+        if (discreteVariablesCount > 0) {
             // tooltip div
-            // I don't really want to append to body but it only works this way if I do
+            // I don't really want to append directly to body but it only works this way if I do
             const tip = d3.select('body').append("div")
                 .attr("class", "tooltip")
                 .style("opacity", 0);
 
-            const handleMouseOver = (d, i) => {
-                tip.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                tip.html(`P(X = ${d.value}) = ${round3DP(d.frequency)}`)
-                    .style("left", (d3.event.pageX) + "px")
-                    .style("top", (d3.event.pageY - 28) + "px");
-                console.log(d3.event.pageX, d3.event.pageY);
-            };
-            const handleMouseOut = (d, i) => {
-                tip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-            };
+            const minOrZero = minX < 0 ? 0 : minX;
 
-            const minOrZero = minX < 0 ? 0 : minX,
-                rawDiscreteData = discreteVar.toArray(minOrZero, maxX),
-                discreteData = [];
-            for (let i = 0; i < rawDiscreteData.length; i++) {
-                const curr = rawDiscreteData[i];
-                if (typeof curr !== "undefined") {
-                    discreteData.push({"value": i, "frequency": curr});
+            // this is the total width alotted to each datum
+            // if there is one bar, then the entire bar is this wide
+            // if there are more than one, then they all share this width (they must fit inside it)
+            const totalBarWidth = (width / (maxX - minX)) / 1.25,
+                barSpacing = totalBarWidth / 20, // for now
+                singleBarWidth = (totalBarWidth - (barSpacing * (discreteVariablesCount - 1))) / discreteVariablesCount;
+
+            // for each discrete var, make a set of bars
+            let count = 0;
+            _.forOwn(discreteVariables, (value, variableName) => {
+                const variable = value.variable;
+
+                const barColor = colors[value.color],
+                    translationXDistance = (singleBarWidth + barSpacing) * count;
+
+                const barClassName = `bar i${count}`,
+                    barSelector = `.bar.i${count}`,
+                    barId = ({variableIndex, index}) => `bar${variableIndex}i${index}`;
+
+                /*
+                 * Bars need to have IDs, this is because react-faux-dom is weird with `this` in event listeners, which
+                 * means I can't use it to select the current element in a listener. Instead I can create a function
+                 * that generates IDs, and bind an ID to each bar. Then in the listener, I generate the ID again, and
+                 * use it in my selector to select the current bar.
+                 */
+
+                function getBar(data) {
+                    const selector = `#${barId(data)}`;
+                    return d3.select(selector);
                 }
-            }
 
-            const sigma = Math.sqrt(discreteVar.Var()),
-                mu = discreteVar.E(),
-                normalApprox = normalPDF(mu, sigma * sigma),
-                barWidth = (width / (maxX - minX)) / 1.25; // for now
+                const handleMouseOver = (d, i) => {
+                    // move the tooltip to where the cursor is and make it visible
+                    tip.html(`P(${variableName} = ${d.value}) = ${round3DP(d.frequency)}`)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                    tip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
 
-            svg.selectAll(".bar")
-                .data(discreteData)
-                .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", function (d) {
-                    return x(d.value) - barWidth / 2;
-                })
-                .attr("width", barWidth)
-                // .attr("y", function (d) {
-                //     return y(0);
-                // })
-                // .attr("height", 0)
-                // .transition()
-                // .duration(500)
-                .attr("y", function (d) {
-                    return y(d.frequency);
-                })
-                .attr("height", function (d) {
-                    return height - y(d.frequency);
-                });
+                    // change the colour to the hover colour
+                    getBar(d).style("fill", barColor.hover);
+                };
+                const handleMouseOut = (d, i) => {
+                    // hide the tooltip
+                    tip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
 
-            svg.selectAll(".bar")
-                .on("mouseover", handleMouseOver)
-                .on("mouseout", handleMouseOut);
+                    // change the colour back to the default colour
+                    getBar(d).style("fill", barColor.default);
+                };
 
-            // make the first bar half as wide to accomodate the y-axis
-            svg.select(".bar")
-                .attr("width", barWidth / 2)
-                .attr("transform", "translate(" + barWidth / 2 + ", 0)");
+                const rawDiscreteData = variable.toArray(minOrZero, maxX),
+                    discreteData = [];
+                for (let i = 0; i < rawDiscreteData.length; i++) {
+                    const curr = rawDiscreteData[i];
+                    if (typeof curr !== "undefined") {
+                        discreteData.push({"variableIndex": count, "index": i, "value": i, "frequency": curr});
+                    }
+                }
+
+                const sigma = Math.sqrt(variable.Var()),
+                    mu = variable.E(),
+                    normalApprox = normalPDF(mu, sigma * sigma);
+
+                svg.selectAll(barSelector)
+                    .data(discreteData)
+                    .enter().append("rect")
+                    .style("fill", barColor.default)
+                    .attr("class", barClassName)
+                    .attr("id", barId)
+                    .attr("x", function (d) {
+                        return x(d.value) - totalBarWidth / 2;
+                    })
+                    .attr("width", singleBarWidth)
+                    .attr("transform", `translate(${translationXDistance}, 0)`)
+                    // .attr("y", function (d) {
+                    //     return y(0);
+                    // })
+                    // .attr("height", 0)
+                    // .transition()
+                    // .duration(500)
+                    .attr("y", function (d) {
+                        return y(d.frequency);
+                    })
+                    .attr("height", function (d) {
+                        return height - y(d.frequency);
+                    });
+
+                svg.selectAll(barSelector)
+                    .on("mouseover", handleMouseOver)
+                    .on("mouseout", handleMouseOut);
+
+                // make the first bar half as wide to accommodate the y-axis
+                // svg.select(".bar")
+                //     .attr("width", singleBarWidth / 2)
+                //     .attr("transform", "translate(" + singleBarWidth / 2 + ", 0)");
+                count++;
+            });
         }
 
         const makeLineFunction = (line, formulae, colors, xDomain, x, y, tails, tailsZ, tailsY) => {
@@ -352,27 +449,28 @@ class Chart extends Component {
         };
 
         const PDFs = [],
-            colors = [];
+            lineColors = [];
         let flag = false;
         if (contVar) {
             flag = true;
             PDFs.push(normalPDF(contVar.E(), contVar.Var()));
-            colors.push(fnColors.contVar);
+            lineColors.push(fnColors.contVar);
         }
         if (PDF) {
             flag = true;
             PDFs.push(PDF);
-            colors.push(fnColors.PDF);
+            lineColors.push(fnColors.PDF);
         }
         if (flag) {
-            makeLineFunction(line, PDFs, colors, xDomain, x, y, tails, tailsZ, tailsY);
+            makeLineFunction(line, PDFs, lineColors, xDomain, x, y, tails, tailsZ, tailsY);
         }
 
         return true;
     };
 
     renderD3(margin, width, height) {
-        const faux = this.faux;
+        const faux = this.faux; // the faux-dom container
+
         const svg = d3.select(faux).append('svg')
             .attr("id", "graph")
             .attr("width", width + margin.left + margin.right)

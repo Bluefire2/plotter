@@ -4,6 +4,12 @@ import './App.css';
 
 import Chart from './components/chart';
 
+const variablesTest = {
+    'X': 'B(10, 0.2)',
+    'Y': 'B(10, 0.5)',
+    'Z': 'B(10, 0.7)'
+};
+
 class App extends Component {
     render() {
         return (
@@ -17,7 +23,7 @@ class App extends Component {
                 </p>
                 <Chart width={1000} height={500}
                        maxY={0.4}
-                       discreteVar={"B(10, 0.2)"}
+                       variables={variablesTest}
                     />
             </div>
         );

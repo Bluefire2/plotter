@@ -51,6 +51,7 @@ export function Normal(m, s2, CC) {
         variance = s2,
         dev = Math.sqrt(s2);
 
+    this.isDiscrete = false;
     this.data = function () {
         return [mean, variance];
     };
@@ -157,6 +158,7 @@ export function Poisson(p) {
     const lambda = p,
         lexp = Math.exp(-lambda);
 
+    this.isDiscrete = true;
     this.data = function () {
         return [lambda];
     };
@@ -215,6 +217,7 @@ export function Binomial(n, p) {
         return false;
     }
 
+    this.isDiscrete = true;
     this.data = function () {
         return _data;
     };
@@ -288,6 +291,7 @@ export function NBinomial(r, p) {
         return false;
     }
 
+    this.isDiscrete = true;
     this.data = function () {
         return _data;
     };
