@@ -283,7 +283,7 @@ class Chart extends Component {
         const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
             d3.select(faux).selectAll(".graph-line").remove(); // remove the current lines
 
-            // line function, for continuous variables
+            // line function
             const line = d3.line()
                 .x(function (d) {
                     return x(d.x);
@@ -322,6 +322,7 @@ class Chart extends Component {
                     .datum(data)
                     .attr("class", "graph-line")
                     .attr("class", "line")
+                    .attr("transform", `translate(${setWidthWithSpacing / 2}, 0)`) // need to translate the path right since the x-axis is shifted
                     .style("stroke", color.default)
                     .attr("d", line);
             });
