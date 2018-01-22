@@ -8,7 +8,8 @@ const variablesTest = {
     'X': 'B(10, 0.2)',
     'Y': 'B(10, 0.5)',
     'Z': 'B(10, 0.7)',
-    'H': 'N(3, 5)'
+    'H': 'N(3, 5)',
+    'I': 'N(5, 2)'
 };
 
 class App extends Component {

@@ -124,16 +124,24 @@ class Chart extends Component {
 
         const colors = [
             {
-                default: 'orange',
-                hover: 'orangered'
+                default: '#FFA500',
+                hover: '#FF4500'
             },
             {
-                default: 'green',
-                hover: 'lightgreen'
+                default: '#008000',
+                hover: '#9ACD32'
             },
             {
-                default: 'blue',
-                hover: 'lightblue'
+                default: '#483D8B',
+                hover: '#4169E1'
+            },
+            {
+                default: '#800080',
+                hover: '#9370DB'
+            },
+            {
+                default: '#8B4513',
+                hover: '#D2B48C'
             }
         ];
         const discreteVariables = {},
@@ -168,7 +176,7 @@ class Chart extends Component {
         const xDomain = [],
             yDomain = [minY, maxY];
 
-        for(let i = minX; i <= maxX; i++) {
+        for (let i = minX; i <= maxX; i++) {
             xDomain.push(i);
         }
 
@@ -317,7 +325,7 @@ class Chart extends Component {
             });
         }
 
-        const makeLineFunction = (formulae, xDomain, x, y, tails, tailsZ, tailsY) => {
+        const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
             d3.select(faux).selectAll(".graph-line").remove(); // remove the current lines
 
             // line function, for continuous variables
@@ -331,18 +339,38 @@ class Chart extends Component {
                 .curve(d3.curveBasis);
 
             const xArray = d3.range((+xDomain[0]), (+xDomain[xDomain.length - 1] + 0.5), 0.1),
-                data = [],
                 animationLength = 500;
-            _.forOwn(formulae, (value, variableName) => {
-                data.push(xArray.map((x1) => {
+            _.forOwn(variables, (value, variableName) => {
+                // determine the pdf function for the variable
+                let pdf;
+                if (typeof value.variable === "string") {
+                    // the variable is already a pdf
+                    pdf = value.variable;
+                } else {
+                    // we need to extract the pdf
+                    pdf = value.variable.PDFformula;
+                }
+                const pdfFunction = x => math.eval(pdf, {x}),
+                    color = colors[value.color]; // the colour to draw the line with
+
+                console.log(color);
+
+                // create the data series for the variable (the cartesian co-ordinates for the line)
+                const data = xArray.map(x => {
                     return {
-                        x: x1,
+                        x: x,
                         // evaluate y for the given x
-                        y: math.eval(value, {
-                            x: x1
-                        })
+                        y: pdfFunction(x)
                     };
-                }));
+                });
+
+                // use the data series to draw the path
+                svg.append("path")
+                    .datum(data)
+                    .attr("class", "graph-line")
+                    .attr("class", "line")
+                    .style("stroke", color.default)
+                    .attr("d", line);
             });
 
             // function tweenDash() {
@@ -358,16 +386,6 @@ class Chart extends Component {
             //         .duration(animationLength)
             //         .attrTween("stroke-dasharray", tweenDash);
             // }
-
-            // make the path
-            data.forEach((singleLineData, index) => {
-                svg.append("path")
-                    .datum(singleLineData)
-                    .attr("class", "graph-line")
-                    .attr("class", "line")
-                    .attr("d", line);
-                    //.call(transition);
-            });
 
             // // put in tails
             // const rightTailPolygon = [],
@@ -427,24 +445,12 @@ class Chart extends Component {
             // }, animationLength);
         };
 
-        const PDFs = {};
-        if(continuousVariablesCount > 0) {
+        if (continuousVariablesCount > 0) {
             // we have continuous variables defined
-            _.forOwn(continuousVariables, (value, variableName) => {
-                let pdf;
-                if(typeof value.variable === "string") {
-                    // the variable is already a pdf
-                    pdf = value.variable;
-                } else {
-                    // we need to extract the pdf
-                    pdf = value.variable.PDFformula;
-                }
-                PDFs[variableName] = pdf;
-            });
-        }
 
-        // now we plot the PDFs
-        makeLineFunction(PDFs, xDomain, x, y);
+            // now we plot the PDFs
+            drawContinuousVariablePDFs(continuousVariables, xDomain, x, y);
+        }
 
         return true;
     };

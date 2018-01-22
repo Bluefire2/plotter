@@ -78,7 +78,6 @@
 
 .line {
     fill: none;
-    stroke: red;
     stroke-width: 3px; /* I haven't managed to figure out how to make the tail-shading polygon have curved edges like the line, so this is the workaround... */
 }
 
