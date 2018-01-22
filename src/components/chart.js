@@ -308,8 +308,6 @@ class Chart extends Component {
                 const pdfFunction = x => math.eval(pdf, {x}),
                     color = variableColors[value.color]; // the colour to draw the line with
 
-                console.log(color);
-
                 // create the data series for the variable (the cartesian co-ordinates for the line)
                 const data = xArray.map(x => {
                     return {
