@@ -185,23 +185,29 @@ class Chart extends Component {
         }
 
         // make the x- and y-axes
-        const xDomain = [minX, maxX],
+        const xDomain = [],
             yDomain = [minY, maxY];
 
-        const x = d3.scaleLinear()
-            .range([0, width]);
+        for(let i = minX; i <= maxX; i++) {
+            xDomain.push(i + '');
+        }
+
+        const x = d3.scaleBand()
+            .domain(xDomain)
+            .range([0, width])
+            .align(0.5);
 
         const y = d3.scaleLinear()
-            .range([height, 0]);
+            .range([height, 0])
+            .domain(yDomain);
 
         const xAxis = d3.axisBottom(x)
-            .ticks(maxX - minX);
+            .ticks(maxX - minX)
+            .tickSizeInner(4)
+            .tickSizeOuter(20)
+            .tickPadding(3);
 
         const yAxis = d3.axisLeft(y);
-
-        // define x and y
-        x.domain(xDomain);
-        y.domain(yDomain);
 
         // line function, for continuous variables
         const line = d3.line()
@@ -245,12 +251,14 @@ class Chart extends Component {
 
             const minOrZero = minX < 0 ? 0 : minX;
 
-            // this is the total width alotted to each datum
+            // this is the total width alotted to each set of bars
             // if there is one bar, then the entire bar is this wide
             // if there are more than one, then they all share this width (they must fit inside it)
-            const totalBarWidth = (width / (maxX - minX)) / 1.25,
-                barSpacing = totalBarWidth / 20, // for now
-                singleBarWidth = (totalBarWidth - (barSpacing * (discreteVariablesCount - 1))) / discreteVariablesCount;
+            const setWidthWithSpacing = width / (maxX - minX + 1),
+                setSpacing = setWidthWithSpacing / 10, // spacing between sets
+                setWidth = setWidthWithSpacing - 2 * setSpacing, // actual set width (minus spacing)
+                barSpacing = setWidth / 20, // spacing between bars
+                barWidth = (setWidth - (barSpacing * (discreteVariablesCount - 1))) / discreteVariablesCount; // width of one bar
 
             // for each discrete var, make a set of bars
             let count = 0;
@@ -258,11 +266,11 @@ class Chart extends Component {
                 const variable = value.variable;
 
                 const barColor = colors[value.color],
-                    translationXDistance = (singleBarWidth + barSpacing) * count;
+                    translationXDistance = setWidthWithSpacing / 2 + (barWidth + barSpacing) * count;
 
                 const barClassName = `bar i${count}`,
                     barSelector = `.bar.i${count}`,
-                    barId = ({variableIndex, index}) => `bar${variableIndex}i${index}`;
+                    barId = ({variableIndex, index}) => `bar${index}i${variableIndex}`;
 
                 /*
                  * Bars need to have IDs, this is because react-faux-dom is weird with `this` in event listeners, which
@@ -318,9 +326,9 @@ class Chart extends Component {
                     .attr("class", barClassName)
                     .attr("id", barId)
                     .attr("x", function (d) {
-                        return x(d.value) - totalBarWidth / 2;
+                        return x(d.value) - setWidth / 2;
                     })
-                    .attr("width", singleBarWidth)
+                    .attr("width", barWidth)
                     .attr("transform", `translate(${translationXDistance}, 0)`)
                     // .attr("y", function (d) {
                     //     return y(0);
@@ -339,10 +347,6 @@ class Chart extends Component {
                     .on("mouseover", handleMouseOver)
                     .on("mouseout", handleMouseOut);
 
-                // make the first bar half as wide to accommodate the y-axis
-                // svg.select(".bar")
-                //     .attr("width", singleBarWidth / 2)
-                //     .attr("transform", "translate(" + singleBarWidth / 2 + ", 0)");
                 count++;
             });
         }
@@ -503,7 +507,7 @@ class Chart extends Component {
 Chart.defaultProps = {
     chart: 'loading...',
     minX: 0,
-    maxX: 20,
+    maxX: 10,
     minY: 0,
     maxY: 1,
     lt: 0,
