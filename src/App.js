@@ -7,7 +7,8 @@ import Chart from './components/chart';
 const variablesTest = {
     'X': 'B(10, 0.2)',
     'Y': 'B(10, 0.5)',
-    'Z': 'B(10, 0.7)'
+    'Z': 'B(10, 0.7)',
+    'H': 'N(3, 5)'
 };
 
 class App extends Component {
