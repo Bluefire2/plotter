@@ -3,7 +3,9 @@ import * as d3 from 'd3';
 import * as math from 'mathjs';
 import * as _ from 'lodash';
 import {withFauxDOM} from 'react-faux-dom';
+
 import {Normal, Poisson, Binomial, NBinomial, Geometric} from '../distributions';
+import variableColors from '../colors';
 
 /**
  * Properties:
@@ -121,29 +123,6 @@ class Chart extends Component {
         }
 
         // parse all the variables, and assign them colours
-
-        const colors = [
-            {
-                default: '#FFA500',
-                hover: '#FF4500'
-            },
-            {
-                default: '#008000',
-                hover: '#9ACD32'
-            },
-            {
-                default: '#483D8B',
-                hover: '#4169E1'
-            },
-            {
-                default: '#800080',
-                hover: '#9370DB'
-            },
-            {
-                default: '#8B4513',
-                hover: '#D2B48C'
-            }
-        ];
         const discreteVariables = {},
             continuousVariables = {};
 
@@ -164,7 +143,7 @@ class Chart extends Component {
 
             obj[key] = {
                 variable: parseVariable(value),
-                color: count % colors.length
+                color: count % variableColors.length
             };
 
             count++;
@@ -239,7 +218,7 @@ class Chart extends Component {
             _.forOwn(discreteVariables, (value, variableName) => {
                 const variable = value.variable;
 
-                const barColor = colors[value.color],
+                const barColor = variableColors[value.color],
                     translationXDistance = setWidthWithSpacing / 2 + (barWidth + barSpacing) * count;
 
                 const barClassName = `bar i${count}`,
@@ -351,7 +330,7 @@ class Chart extends Component {
                     pdf = value.variable.PDFformula;
                 }
                 const pdfFunction = x => math.eval(pdf, {x}),
-                    color = colors[value.color]; // the colour to draw the line with
+                    color = variableColors[value.color]; // the colour to draw the line with
 
                 console.log(color);
 
