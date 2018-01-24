@@ -3,15 +3,33 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {addChart, changeHeight, changeWidth} from '../actions/index';
 
-import VariableInput from '../components/variable_input';
-
 class InputContainer extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            variablesText: ""
+        };
+    }
+
+    textareaChangeHandler(e) {
+        this.setState({
+            variablesText: e.target.value
+        });
+    }
+
+    renderButtonClick(e) {
+        // TODO: write the handler
+    }
+
     render() {
         const placeholderValue = "X~B(10, 0.3)";
         return (
             <div id="input-container">
-                <VariableInput placeholder={placeholderValue}/><br/>
-                <button className="btn" id="render-btn">Render</button>
+                <textarea id="variable-input" placeholder={placeholderValue}
+                          value={this.state.variablesText}
+                          onChange={this.textareaChangeHandler.bind(this)}/>
+                <br/>
+                <button className="btn" id="render-btn" onClick={this.renderButtonClick.bind(this)}>Render</button>
             </div>
         );
     }
