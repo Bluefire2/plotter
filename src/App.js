@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import Chart from './components/chart';
+import ChartsContainer from './containers/charts_container';
 
 const variablesTest = {
     'X': 'B(10, 0.2)',
@@ -23,10 +24,7 @@ class App extends Component {
                 <p className="App-intro">
                     To get started, edit <code>src/App.js</code> and save to reload.
                 </p>
-                <Chart width={1000} height={500}
-                       maxY={0.4}
-                       variables={variablesTest}
-                    />
+                <ChartsContainer/>
             </div>
         );
     }
