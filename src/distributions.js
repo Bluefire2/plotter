@@ -189,11 +189,11 @@ export function Poisson(p) {
             return sum * lexp;
         }
     };
-    this.lessThan = function (b) {
-        return this.between(0, b - 1);
+    this.moreThan = function (x) {
+        return 1 - this.lessThan(x + 1);
     };
-    this.moreThan = function (b) {
-        return 1 - this.between(0, b);
+    this.lessThan = function (x) {
+        return this.between(0, x - 1);
     };
     this.toArray = function (lower, upper) {
         lower = typeof upper === "undefined" ? 0 : lower;
@@ -255,10 +255,10 @@ export function Binomial(n, p) {
         }
     };
     this.moreThan = function (x) {
-        return this.between(x, amt);
+        return 1 - this.lessThan(x + 1);
     };
     this.lessThan = function (x) {
-        return this.between(0, x);
+        return this.between(0, x - 1);
     };
     this.approximate = function (type) {
         switch (type) {
@@ -329,10 +329,10 @@ export function NBinomial(r, p) {
         }
     };
     this.moreThan = function (x) {
-        return 1 - this.lessThan(x - 1);
+        return 1 - this.lessThan(x + 1);
     };
     this.lessThan = function (x) {
-        return this.between(0, x);
+        return this.between(0, x - 1);
     };
     this.toArray = function (lower, upper) {
         lower = typeof upper === "undefined" ? 0 : lower;

@@ -223,6 +223,9 @@ class Chart extends Component {
                         // make all arrows visible
                         const aboveBarBy = 10;
 
+                        const leftOpenTailValue = round3DP(variable.lessThan(d.value)),
+                            rightOpenTailValue = round3DP(variable.moreThan(d.value));
+
                         function positionArrowAndLabel(arrow, label, x, y, labelText) {
                             arrow.attr("x1", x)
                                 .attr("y1", y)
@@ -247,7 +250,7 @@ class Chart extends Component {
                             d3.select(".left-open-tail-arrow-label"),
                             coordinates.x,
                             coordinates.y - aboveBarBy,
-                            "a"
+                            leftOpenTailValue
                         );
 
                         // right open arrow
@@ -256,7 +259,7 @@ class Chart extends Component {
                             d3.select(".right-open-tail-arrow-label"),
                             coordinates.x + setWidth,
                             coordinates.y - aboveBarBy,
-                            "b"
+                            rightOpenTailValue
                         );
                     } else {
                         // make all arrows invisible
@@ -371,7 +374,8 @@ class Chart extends Component {
                 .style("opacity", 0);
 
             svg.selectAll(".arrow-label")
-                .style("opacity", 0);
+                .style("opacity", 0)
+                .attr("text-anchor", "middle");
         }
 
         const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
