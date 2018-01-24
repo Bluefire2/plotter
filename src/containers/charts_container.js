@@ -4,10 +4,6 @@ import {connect} from 'react-redux';
 import Chart from '../components/chart';
 
 class ChartsContainer extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         let chartElements;
         if(this.props.charts) {
