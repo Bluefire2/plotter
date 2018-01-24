@@ -10,6 +10,7 @@ import variableColors from '../colors';
 /**
  * Properties:
  *
+ * chartID
  * width
  * height
  * variables
@@ -25,6 +26,7 @@ class Chart extends Component {
         super(props);
         this.renderD3 = this.renderD3.bind(this);
         this.faux = this.props.connectFauxDOM('div', 'chart');
+        this.ID = this.props.chartID
     }
 
     componentDidMount() {
@@ -41,7 +43,10 @@ class Chart extends Component {
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY) {
-        const faux = this.faux;
+        const faux = this.faux,
+            self = this;
+        
+        const CHART_ID = `chart${this.ID}`;
 
         svg.selectAll("*").remove(); // clear current chart
 
@@ -291,7 +296,7 @@ class Chart extends Component {
             // tooltip div
             // I don't really want to append directly to body but it only works this way if I do
             const tip = d3.select('body').append("div")
-                .attr("class", "tooltip")
+                .attr("class", `${CHART_ID} tooltip`)
                 .style("opacity", 0);
 
             const minOrZero = minX < 0 ? 0 : minX;
@@ -309,9 +314,9 @@ class Chart extends Component {
                 const barColor = variableColors[value.color],
                     xShift = (barWidth + barSpacing) * count;
 
-                const barClassName = `bar i${count}`,
-                    barSelector = `.bar.i${count}`,
-                    barId = ({variableIndex, index}) => `bar${index}i${variableIndex}`;
+                const barClassName = `${CHART_ID} bar i${count}`,
+                    barSelector = `.${CHART_ID}.bar.i${count}`,
+                    barId = ({variableIndex, index}) => `${CHART_ID}bar${index}i${variableIndex}`;
 
                 /*
                  * Bars need to have IDs, this is because react-faux-dom is weird with `this` in event listeners, which
@@ -345,16 +350,16 @@ class Chart extends Component {
                                 .text(labelText);
                         }
 
-                        d3.selectAll(".tail-arrow")
+                        d3.selectAll(`.${CHART_ID}.tail-arrow`)
                             .style("opacity", 1);
 
-                        d3.selectAll(".arrow-label")
+                        d3.selectAll(`.${CHART_ID}.arrow-label`)
                             .style("opacity", 1);
 
                         // left open arrow
                         positionArrowAndLabel(
-                            d3.select(".left-tail-arrow.open-tail-arrow"),
-                            d3.select(".left-open-tail-arrow-label"),
+                            d3.select(`.${CHART_ID}.left-tail-arrow.open-tail-arrow`),
+                            d3.select(`.${CHART_ID}.left-open-tail-arrow-label`),
                             coordinates.x,
                             coordinates.y - aboveBarBy,
                             leftOpenTailValue
@@ -362,18 +367,18 @@ class Chart extends Component {
 
                         // right open arrow
                         positionArrowAndLabel(
-                            d3.select(".right-tail-arrow.open-tail-arrow"),
-                            d3.select(".right-open-tail-arrow-label"),
+                            d3.select(`.${CHART_ID}.right-tail-arrow.open-tail-arrow`),
+                            d3.select(`.${CHART_ID}.right-open-tail-arrow-label`),
                             coordinates.x + setWidth,
                             coordinates.y - aboveBarBy,
                             rightOpenTailValue
                         );
                     } else {
                         // make all arrows invisible
-                        d3.selectAll(".tail-arrow")
+                        d3.selectAll(`.${CHART_ID}.tail-arrow`)
                             .style("opacity", 0);
 
-                        d3.selectAll(".arrow-label")
+                        d3.selectAll(`.${CHART_ID}.arrow-label`)
                             .style("opacity", 0);
                     }
                 }
@@ -465,16 +470,17 @@ class Chart extends Component {
 
             // left open arrow and label
             svg.append('line')
-                .attr("class", "tail-arrow left-tail-arrow open-tail-arrow")
+                .attr("class", `${CHART_ID} tail-arrow left-tail-arrow open-tail-arrow`)
                 .attr("x2", translationDistance);
             svg.append('text')
-                .attr("class", "arrow-label left-open-tail-arrow-label");
+                .attr("class", `${CHART_ID} arrow-label left-open-tail-arrow-label`);
 
+            // right open arrow and label
             svg.append('line')
-                .attr("class", "tail-arrow right-tail-arrow open-tail-arrow")
+                .attr("class", `${CHART_ID} tail-arrow right-tail-arrow open-tail-arrow`)
                 .attr("x2", x(maxX) + translationDistance);
             svg.append('text')
-                .attr("class", "arrow-label right-open-tail-arrow-label");
+                .attr("class", `${CHART_ID} arrow-label right-open-tail-arrow-label`);
 
             svg.selectAll(".tail-arrow")
                 .attr("marker-end", "url(#arrow-marker)")
@@ -492,7 +498,7 @@ class Chart extends Component {
         const faux = this.faux; // the faux-dom container
 
         const svg = d3.select(faux).append('svg')
-            .attr("id", "graph")
+            .attr("id", `chart${this.ID}`)
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -513,7 +519,7 @@ class Chart extends Component {
 
     render() {
         return (
-            <div id="graph-container">
+            <div className="chart-container">
                 {this.props.chart}
             </div>
         );

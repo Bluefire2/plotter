@@ -11,13 +11,14 @@ class ChartsContainer extends Component {
     render() {
         let chartElements;
         if(this.props.charts) {
-            chartElements = this.props.charts.map(chart => {
+            chartElements = this.props.charts.map((chart, index) => {
                 return <Chart width={this.props.width} height={this.props.height}
                               variables={chart.variables}
                               minX={chart.minX}
                               maxX={chart.maxX}
                               minY={chart.minY}
-                              maxY={chart.maxY}/>
+                              maxY={chart.maxY}
+                              chartID={index}/>
             });
         } else {
             chartElements = null;
