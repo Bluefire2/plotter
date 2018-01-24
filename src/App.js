@@ -2,16 +2,7 @@ import React, {Component} from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import Chart from './components/chart';
 import ChartsContainer from './containers/charts_container';
-
-const variablesTest = {
-    'X': 'B(10, 0.2)',
-    'Y': 'B(10, 0.5)',
-    'Z': 'B(10, 0.7)',
-    'H': 'N(3, 5)',
-    'I': 'N(5, 2)'
-};
 
 class App extends Component {
     render() {
