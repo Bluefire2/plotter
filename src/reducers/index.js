@@ -1,7 +1,13 @@
 import {combineReducers} from 'redux';
 
+import chartReducer from './chart_reducer';
+import widthReducer from './width_reducer';
+import heightReducer from './height_reducer';
+
 const rootReducer = combineReducers({
-    state: (state = {}) => state
+    charts: chartReducer,
+    chartWidth: widthReducer,
+    chartHeight: heightReducer
 });
 
 export default rootReducer;

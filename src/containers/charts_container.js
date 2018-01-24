@@ -6,23 +6,22 @@ import Chart from '../components/chart';
 class ChartsContainer extends Component {
     constructor(props) {
         super(props);
-
-        this.state = {
-            charts: props.charts,
-            width: props.chartWidth,
-            height: props.chartHeight
-        }
     }
 
     render() {
-        const chartElements = this.state.charts.map(chart => {
-            return <Chart width={this.state.width} height={this.state.height}
-                          variables={chart.variables}
-                          minX={chart.minX}
-                          maxX={chart.maxX}
-                          minY={chart.minY}
-                          maxY={chart.maxY}/>
-        });
+        let chartElements;
+        if(this.props.charts) {
+            chartElements = this.props.charts.map(chart => {
+                return <Chart width={this.props.width} height={this.props.height}
+                              variables={chart.variables}
+                              minX={chart.minX}
+                              maxX={chart.maxX}
+                              minY={chart.minY}
+                              maxY={chart.maxY}/>
+            });
+        } else {
+            chartElements = null;
+        }
         return (
             <div id="charts">
                 {chartElements}
@@ -31,11 +30,11 @@ class ChartsContainer extends Component {
     }
 }
 
-const mapStateToProps = ({charts, chartWidth, chartHeight}) => {
+const mapStateToProps = (state) => {
     return {
-        charts,
-        chartWidth,
-        chartHeight
+        charts: state.charts,
+        width: state.chartWidth,
+        height: state.chartHeight
     };
 };
 
