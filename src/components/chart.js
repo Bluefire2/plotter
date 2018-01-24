@@ -39,7 +39,7 @@ class Chart extends Component {
             top: height / 20,
             bottom: height / 20
         };
-        this.renderD3(margin, width, height);
+        this.renderD3(margin);
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY) {
@@ -494,13 +494,13 @@ class Chart extends Component {
         return true;
     };
 
-    renderD3(margin, width, height) {
+    renderD3(margin) {
         const faux = this.faux; // the faux-dom container
 
         const svg = d3.select(faux).append('svg')
             .attr("id", `chart${this.ID}`)
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", this.props.width + margin.left + margin.right)
+            .attr("height", this.props.height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
