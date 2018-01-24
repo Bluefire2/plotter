@@ -1,3 +1,9 @@
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #fafafa;
+}
+
 .App {
     text-align: center;
 }
@@ -29,6 +35,11 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+#content {
+    display: flex;
+    align-items: stretch;
 }
 
 /*
@@ -89,4 +100,31 @@ div.tooltip {
 #arrow-marker {
     stroke-width: 1;
     stroke-dasharray: 0;
+}
+
+/*
+    Input container as sidebar
+ */
+#sidebar {
+    min-width: 300px;
+    max-width: 300px;
+    min-height: 100vh;
+    margin-right: 50px;
+    background: #7386D5;
+    color: #fff;
+    transition: all 0.3s;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: #6d7fcc;
+    margin-bottom: 10px;
+}
+
+#variable-input {
+    height: 150px;
+}
+
+#render-btn {
+    margin: 10px;
 }
