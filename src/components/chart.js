@@ -178,6 +178,131 @@ class Chart extends Component {
             .style("text-anchor", "end")
             .text("Probability/density");
 
+        if (continuousVariablesCount > 0) {
+            // we have continuous variables defined
+            const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
+                d3.select(faux).selectAll(".graph-line").remove(); // remove the current lines
+
+                // line function
+                const line = d3.line()
+                    .x(function (d) {
+                        return x(d.x);
+                    })
+                    .y(function (d) {
+                        return y(d.y);
+                    })
+                    .curve(d3.curveBasis);
+
+                const xArray = d3.range((+xDomain[0]), (+xDomain[xDomain.length - 1] + 0.5), 0.1),
+                    animationLength = 500;
+                _.forOwn(variables, (value, variableName) => {
+                    // determine the pdf function for the variable
+                    let pdf;
+                    if (typeof value.variable === "string") {
+                        // the variable is already a pdf
+                        pdf = value.variable;
+                    } else {
+                        // we need to extract the pdf
+                        pdf = value.variable.PDFformula;
+                    }
+                    const pdfFunction = x => math.eval(pdf, {x}),
+                        color = variableColors[value.color]; // the colour to draw the line with
+
+                    // create the data series for the variable (the cartesian co-ordinates for the line)
+                    const data = xArray.map(x => {
+                        return {
+                            x: x,
+                            // evaluate y for the given x
+                            y: pdfFunction(x)
+                        };
+                    });
+
+                    // use the data series to draw the path
+                    svg.append("path")
+                        .datum(data)
+                        .attr("class", "graph-line")
+                        .attr("class", "line")
+                        .attr("transform", `translate(${translationDistance}, 0)`) // need to translate the path right since the x-axis is shifted
+                        .style("stroke", color.default)
+                        .attr("d", line);
+                });
+
+                // function tweenDash() {
+                //     const l = this.getTotalLength(),
+                //         i = d3.interpolateString("0," + l, l + "," + l);
+                //     return function (t) {
+                //         return i(t);
+                //     };
+                // }
+                //
+                // function transition(path) {
+                //     path.transition()
+                //         .duration(animationLength)
+                //         .attrTween("stroke-dasharray", tweenDash);
+                // }
+
+                // // put in tails
+                // const rightTailPolygon = [],
+                //     leftTailPolygon = [];
+                // data[0].forEach(elem => {
+                //     if (elem.x <= tailsZ[0]) {
+                //         leftTailPolygon.push(elem);
+                //     } else if (elem.x >= tailsZ[1]) {
+                //         rightTailPolygon.push(elem);
+                //     } else {
+                //         return false;
+                //     }
+                // });
+                // leftTailPolygon.push({x: tailsZ[0], y: tailsY[0]}, {x: tailsZ[0], y: 0}, {x: 0, y: 0});
+                // rightTailPolygon.unshift({x: 0, y: 0}, {x: tailsZ[1], y: 0}, {x: tailsZ[1], y: tailsY[1]}); // it hurts my eyes
+                //
+                // setTimeout(() => {
+                //     if (isBetween(tails[0], 0, 1) && isBetween(tailsZ[0], minX, maxX)) {
+                //         svg.append("polygon")
+                //             .attr({
+                //                 points: matrixToPolygonPoints(leftTailPolygon, x, y),
+                //                 id: "leftTail",
+                //                 "class": "tail"
+                //             });
+                //     }
+                //     if (isBetween(tails[1], 0, 1) && isBetween(tailsZ[1], minX, maxX)) {
+                //         svg.append("polygon")
+                //             .attr({
+                //                 points: matrixToPolygonPoints(rightTailPolygon, x, y),
+                //                 id: "rightTail",
+                //                 "class": "tail"
+                //             });
+                //     }
+                //     svg.selectAll(".tail")
+                //         .style({
+                //             opacity: 0.5,
+                //             fill: "red"
+                //         })
+                //         .on("mouseover", function () {
+                //             const self = d3.select(this),
+                //                 side = self.attr("id").slice(0, -4),
+                //                 popupId = self.attr("id") + "Popup";
+                //
+                //             self.style("opacity", 0.7);
+                //             // TODO: write code for popup showing the tail's z-value
+                //             // svg.append (TBC)
+                //         })
+                //         .on("mouseout", function () {
+                //             const self = d3.select(this),
+                //                 side = self.attr("id").slice(0, -4),
+                //                 popupId = self.attr("id") + "Popup";
+                //
+                //             self.style("opacity", 0.5);
+                //             d3.selectAll(".tailPopup") // for the future
+                //                 .remove();
+                //         });
+                // }, animationLength);
+            };
+
+            // now we plot the PDFs
+            drawContinuousVariablePDFs(continuousVariables, xDomain, x, y);
+        }
+
         // make bar chart rectangles
         // only do this if we have discrete variables:
         if (discreteVariablesCount > 0) {
@@ -376,132 +501,6 @@ class Chart extends Component {
             svg.selectAll(".arrow-label")
                 .style("opacity", 0)
                 .attr("text-anchor", "middle");
-        }
-
-        const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
-            d3.select(faux).selectAll(".graph-line").remove(); // remove the current lines
-
-            // line function
-            const line = d3.line()
-                .x(function (d) {
-                    return x(d.x);
-                })
-                .y(function (d) {
-                    return y(d.y);
-                })
-                .curve(d3.curveBasis);
-
-            const xArray = d3.range((+xDomain[0]), (+xDomain[xDomain.length - 1] + 0.5), 0.1),
-                animationLength = 500;
-            _.forOwn(variables, (value, variableName) => {
-                // determine the pdf function for the variable
-                let pdf;
-                if (typeof value.variable === "string") {
-                    // the variable is already a pdf
-                    pdf = value.variable;
-                } else {
-                    // we need to extract the pdf
-                    pdf = value.variable.PDFformula;
-                }
-                const pdfFunction = x => math.eval(pdf, {x}),
-                    color = variableColors[value.color]; // the colour to draw the line with
-
-                // create the data series for the variable (the cartesian co-ordinates for the line)
-                const data = xArray.map(x => {
-                    return {
-                        x: x,
-                        // evaluate y for the given x
-                        y: pdfFunction(x)
-                    };
-                });
-
-                // use the data series to draw the path
-                svg.append("path")
-                    .datum(data)
-                    .attr("class", "graph-line")
-                    .attr("class", "line")
-                    .attr("transform", `translate(${translationDistance}, 0)`) // need to translate the path right since the x-axis is shifted
-                    .style("stroke", color.default)
-                    .attr("d", line);
-            });
-
-            // function tweenDash() {
-            //     const l = this.getTotalLength(),
-            //         i = d3.interpolateString("0," + l, l + "," + l);
-            //     return function (t) {
-            //         return i(t);
-            //     };
-            // }
-            //
-            // function transition(path) {
-            //     path.transition()
-            //         .duration(animationLength)
-            //         .attrTween("stroke-dasharray", tweenDash);
-            // }
-
-            // // put in tails
-            // const rightTailPolygon = [],
-            //     leftTailPolygon = [];
-            // data[0].forEach(elem => {
-            //     if (elem.x <= tailsZ[0]) {
-            //         leftTailPolygon.push(elem);
-            //     } else if (elem.x >= tailsZ[1]) {
-            //         rightTailPolygon.push(elem);
-            //     } else {
-            //         return false;
-            //     }
-            // });
-            // leftTailPolygon.push({x: tailsZ[0], y: tailsY[0]}, {x: tailsZ[0], y: 0}, {x: 0, y: 0});
-            // rightTailPolygon.unshift({x: 0, y: 0}, {x: tailsZ[1], y: 0}, {x: tailsZ[1], y: tailsY[1]}); // it hurts my eyes
-            //
-            // setTimeout(() => {
-            //     if (isBetween(tails[0], 0, 1) && isBetween(tailsZ[0], minX, maxX)) {
-            //         svg.append("polygon")
-            //             .attr({
-            //                 points: matrixToPolygonPoints(leftTailPolygon, x, y),
-            //                 id: "leftTail",
-            //                 "class": "tail"
-            //             });
-            //     }
-            //     if (isBetween(tails[1], 0, 1) && isBetween(tailsZ[1], minX, maxX)) {
-            //         svg.append("polygon")
-            //             .attr({
-            //                 points: matrixToPolygonPoints(rightTailPolygon, x, y),
-            //                 id: "rightTail",
-            //                 "class": "tail"
-            //             });
-            //     }
-            //     svg.selectAll(".tail")
-            //         .style({
-            //             opacity: 0.5,
-            //             fill: "red"
-            //         })
-            //         .on("mouseover", function () {
-            //             const self = d3.select(this),
-            //                 side = self.attr("id").slice(0, -4),
-            //                 popupId = self.attr("id") + "Popup";
-            //
-            //             self.style("opacity", 0.7);
-            //             // TODO: write code for popup showing the tail's z-value
-            //             // svg.append (TBC)
-            //         })
-            //         .on("mouseout", function () {
-            //             const self = d3.select(this),
-            //                 side = self.attr("id").slice(0, -4),
-            //                 popupId = self.attr("id") + "Popup";
-            //
-            //             self.style("opacity", 0.5);
-            //             d3.selectAll(".tailPopup") // for the future
-            //                 .remove();
-            //         });
-            // }, animationLength);
-        };
-
-        if (continuousVariablesCount > 0) {
-            // we have continuous variables defined
-
-            // now we plot the PDFs
-            drawContinuousVariablePDFs(continuousVariables, xDomain, x, y);
         }
 
         return true;
