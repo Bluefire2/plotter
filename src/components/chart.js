@@ -40,9 +40,8 @@ class Chart extends Component {
         this.renderD3(margin, width, height);
     }
 
-    updateGraph(svg, width, height, minX, maxX, minY, maxY, lt = 0, rt = 1) {
-        const self = this,
-            faux = this.faux;
+    updateGraph(svg, width, height, minX, maxX, minY, maxY) {
+        const faux = this.faux;
 
         svg.selectAll("*").remove(); // clear current chart
 
@@ -77,23 +76,6 @@ class Chart extends Component {
 
         function round3DP(num) {
             return Math.round(num * 1000) / 1000;
-        }
-
-        // both of these are inclusive summations, so be careful:
-        function sumRight(array, loc, fn = a => a) {
-            let out = 0;
-            array.slice(loc).forEach(function (elem, index) {
-                out += fn(elem);
-            });
-            return out;
-        }
-
-        function sumLeft(array, loc, fn = a => a) {
-            let out = 0;
-            array.slice(0, loc + 1).forEach(function (elem, index) {
-                out += fn(elem);
-            });
-            return out;
         }
 
         function isBetween(n, a, b) {
@@ -356,7 +338,7 @@ class Chart extends Component {
                                 .attr("y1", y)
                                 .attr("y2", y);
 
-                            const arrowX2 = +arrow.attr("x2");
+                            const arrowX2 = +arrow.attr("x2"); // convert to number
 
                             label.attr("x", (x + arrowX2) / 2)
                                 .attr("y", y - 10)

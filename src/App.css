@@ -34,38 +34,6 @@
 /*
   Bar chart styling
  */
-.bar {
-
-}
-
-.bar.tail {
-    fill: brown;
-}
-
-.bar:hover {
-
-}
-
-#popupDataText {
-    font-family: monospace;
-}
-
-#discreteLabel {
-    color: steelblue;
-}
-
-#contLabel {
-    color: red;
-}
-
-#PDFLabel {
-    color: green;
-}
-
-#CDFLabel {
-    color: purple;
-}
-
 .axis, .arrow-label {
     font: 15px sans-serif;
 }
