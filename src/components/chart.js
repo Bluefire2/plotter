@@ -346,7 +346,7 @@ class Chart extends Component {
                 function renderTailArrows(show, coordinates, setWidth, d) {
                     if (show) {
                         // make all arrows visible
-                        const aboveBarBy = 10;
+                        const aboveBarBy = height / 20;
 
                         const leftOpenTailValue = round3DP(variable.lessThan(d.value)),
                             rightOpenTailValue = round3DP(variable.moreThan(d.value));
