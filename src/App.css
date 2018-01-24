@@ -100,3 +100,25 @@ div.tooltip {
     border-radius: 8px;
     pointer-events: none;
 }
+
+/*
+    Tails arrows
+ */
+.tail-arrow {
+    stroke-width: 5;
+    stroke: #000;
+    z-index: 1000;
+}
+
+.open-tail-arrow {
+    stroke-dasharray: 5, 5;
+}
+
+.closed-tail-arrow {
+    stroke-dasharray: 0;
+}
+
+#arrow-marker {
+    stroke-width: 1;
+    stroke-dasharray: 0;
+}

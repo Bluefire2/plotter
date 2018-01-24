@@ -41,11 +41,25 @@ class Chart extends Component {
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY, lt = 0, rt = 1) {
-        const self = this;
-        // function type(d) {
-        //     d.frequency = +d.frequency;
-        //     return d;
-        // }
+        const self = this,
+            faux = this.faux;
+
+        svg.selectAll("*").remove(); // clear current chart
+
+        const defs = svg.append("defs").attr("class", "test"); // svg defs
+
+        // arrowhead def
+        defs.append("marker")
+            .attr("id", "arrow-marker")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 5)
+            .attr("refY", 0)
+            .attr("markerWidth", 4)
+            .attr("markerHeight", 4)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0, -5L10, 0L0, 5")
+            .attr("class", "arrow-head");
 
         function variableIsDiscrete(variable) {
             // TODO: rewrite the entire distributions spec to make all variables extend a superclass
@@ -66,10 +80,7 @@ class Chart extends Component {
         }
 
         // both of these are inclusive summations, so be careful:
-        function sumRight(array, loc, fn) {
-            fn = typeof fn === "undefined" ? function (a) {
-                return a;
-            } : fn;
+        function sumRight(array, loc, fn = a => a) {
             let out = 0;
             array.slice(loc).forEach(function (elem, index) {
                 out += fn(elem);
@@ -77,10 +88,7 @@ class Chart extends Component {
             return out;
         }
 
-        function sumLeft(array, loc, fn) {
-            fn = typeof fn === "undefined" ? function (a) {
-                return a;
-            } : fn;
+        function sumLeft(array, loc, fn = a => a) {
             let out = 0;
             array.slice(0, loc + 1).forEach(function (elem, index) {
                 out += fn(elem);
@@ -125,7 +133,11 @@ class Chart extends Component {
             count++;
         });
 
-        const faux = this.faux;
+        // this is the total width allotted to each set of bars
+        // if there is one bar, then the entire bar is this wide
+        // if there are more than one, then they all share this width (they must fit inside it)
+        const setWidthWithSpacing = width / (maxX - minX + 1),
+            translationDistance = setWidthWithSpacing / 2;
 
         // make the x- and y-axes
         const xDomain = [],
@@ -137,7 +149,7 @@ class Chart extends Component {
 
         const x = d3.scaleLinear()
             .domain([minX, maxX])
-            .range([0, width]);
+            .range([0, width - setWidthWithSpacing]);
 
         const y = d3.scaleLinear()
             .domain(yDomain)
@@ -148,17 +160,10 @@ class Chart extends Component {
 
         const yAxis = d3.axisLeft(y);
 
-        svg.selectAll("*").remove(); // clear current chart
-
-        // this is the total width allotted to each set of bars
-        // if there is one bar, then the entire bar is this wide
-        // if there are more than one, then they all share this width (they must fit inside it)
-        const setWidthWithSpacing = width / (maxX - minX + 1);
-
         // draw the x axis
         svg.append("g")
             .attr("class", "x axis")
-            .attr("transform", `translate(${setWidthWithSpacing / 2}, ${y(0)})`)
+            .attr("transform", `translate(${translationDistance}, ${y(0)})`)
             .call(xAxis);
 
         // draw the y axis
@@ -195,7 +200,7 @@ class Chart extends Component {
                 const variable = value.variable;
 
                 const barColor = variableColors[value.color],
-                    translationXDistance = setWidthWithSpacing / 2 + (barWidth + barSpacing) * count;
+                    xShift = (barWidth + barSpacing) * count;
 
                 const barClassName = `bar i${count}`,
                     barSelector = `.bar.i${count}`,
@@ -213,6 +218,63 @@ class Chart extends Component {
                     return d3.select(selector);
                 }
 
+                function renderTailArrows(show, coordinates, setWidth, d) {
+                    if (show) {
+                        // make all arrows visible
+                        const aboveBarBy = 10;
+
+                        function positionArrowAndLabel(arrow, label, x, y, labelText) {
+                            arrow.attr("x1", x)
+                                .attr("y1", y)
+                                .attr("y2", y);
+
+                            const arrowX2 = +arrow.attr("x2");
+
+                            label.attr("x", (x + arrowX2) / 2)
+                                .attr("y", y - 10)
+                                .text(labelText);
+                        }
+
+                        d3.selectAll(".tail-arrow")
+                            .style("opacity", 1);
+
+                        d3.selectAll(".arrow-label")
+                            .style("opacity", 1);
+
+                        // left open arrow
+                        positionArrowAndLabel(
+                            d3.select(".left-tail-arrow.open-tail-arrow"),
+                            d3.select(".left-open-tail-arrow-label"),
+                            coordinates.x,
+                            coordinates.y - aboveBarBy,
+                            "a"
+                        );
+
+                        // right open arrow
+                        positionArrowAndLabel(
+                            d3.select(".right-tail-arrow.open-tail-arrow"),
+                            d3.select(".right-open-tail-arrow-label"),
+                            coordinates.x + setWidth,
+                            coordinates.y - aboveBarBy,
+                            "b"
+                        );
+                    } else {
+                        // make all arrows invisible
+                        d3.selectAll(".tail-arrow")
+                            .style("opacity", 0);
+
+                        d3.selectAll(".arrow-label")
+                            .style("opacity", 0);
+                    }
+                }
+
+                function getActualBarCoordinates(bar) {
+                    return {
+                        x: +bar.attr("x"),
+                        y: +bar.attr("y")
+                    };
+                }
+
                 const handleMouseOver = (d, i) => {
                     // move the tooltip to where the cursor is and make it visible
                     tip.html(`P(${variableName} = ${d.value}) = ${round3DP(d.frequency)}`)
@@ -223,7 +285,12 @@ class Chart extends Component {
                         .style("opacity", .9);
 
                     // change the colour to the hover colour
-                    getBar(d).style("fill", barColor.hover);
+                    const bar = getBar(d);
+                    bar.style("fill", barColor.hover);
+
+                    // show tail arrows
+                    const setCoordinates = getActualBarCoordinates(bar);
+                    renderTailArrows(true, setCoordinates, setWidth, d);
                 };
                 const handleMouseOut = (d, i) => {
                     // hide the tooltip
@@ -233,6 +300,9 @@ class Chart extends Component {
 
                     // change the colour back to the default colour
                     getBar(d).style("fill", barColor.default);
+
+                    // hide tail arrows
+                    renderTailArrows(false);
                 };
 
                 const rawDiscreteData = variable.toArray(minOrZero, maxX),
@@ -255,10 +325,10 @@ class Chart extends Component {
                     .attr("class", barClassName)
                     .attr("id", barId)
                     .attr("x", function (d) {
-                        return x(d.value) - setWidth / 2;
+                        return x(d.value) - setWidth / 2 + translationDistance;
                     })
                     .attr("width", barWidth)
-                    .attr("transform", `translate(${translationXDistance}, 0)`)
+                    .attr("transform", `translate(${xShift}, 0)`)
                     // .attr("y", function (d) {
                     //     return y(0);
                     // })
@@ -272,12 +342,36 @@ class Chart extends Component {
                         return height - y(d.frequency);
                     });
 
+
+                // bar hover event handers
                 svg.selectAll(barSelector)
                     .on("mouseover", handleMouseOver)
                     .on("mouseout", handleMouseOut);
 
                 count++;
             });
+
+            // tail arrows, must be drawn after the bars to render on top of them
+
+            // left open arrow and label
+            svg.append('line')
+                .attr("class", "tail-arrow left-tail-arrow open-tail-arrow")
+                .attr("x2", translationDistance);
+            svg.append('text')
+                .attr("class", "arrow-label left-open-tail-arrow-label");
+
+            svg.append('line')
+                .attr("class", "tail-arrow right-tail-arrow open-tail-arrow")
+                .attr("x2", x(maxX) + translationDistance);
+            svg.append('text')
+                .attr("class", "arrow-label right-open-tail-arrow-label");
+
+            svg.selectAll(".tail-arrow")
+                .attr("marker-end", "url(#arrow-marker)")
+                .style("opacity", 0);
+
+            svg.selectAll(".arrow-label")
+                .style("opacity", 0);
         }
 
         const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
@@ -322,7 +416,7 @@ class Chart extends Component {
                     .datum(data)
                     .attr("class", "graph-line")
                     .attr("class", "line")
-                    .attr("transform", `translate(${setWidthWithSpacing / 2}, 0)`) // need to translate the path right since the x-axis is shifted
+                    .attr("transform", `translate(${translationDistance}, 0)`) // need to translate the path right since the x-axis is shifted
                     .style("stroke", color.default)
                     .attr("d", line);
             });
