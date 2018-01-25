@@ -42,6 +42,7 @@ class InputContainer extends Component {
         });
 
         this.props.addChart({
+            title,
             variables,
             minX: 0,
             maxX: 10,

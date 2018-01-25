@@ -8,7 +8,7 @@ class ChartsContainer extends Component {
         let chartElements;
         if(this.props.charts) {
             chartElements = this.props.charts.map((chart, index) => {
-                return <Chart key={index} chartID={index}
+                return <Chart key={index} chartID={index} title={chart.title}
                               width={this.props.width} height={this.props.height}
                               variables={chart.variables}
                               minX={chart.minX}
