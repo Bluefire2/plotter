@@ -34,7 +34,8 @@ class ChartsContainer extends Component {
         let chartElements;
         if(this.props.charts) {
             chartElements = this.props.charts.map((chart, index) => {
-                return <Chart key={index} chartID={index} title={chart.title}
+                const chartTitle = chart.title === '' ? 'Untitled chart' : chart.title;
+                return <Chart key={index} chartID={index} title={chartTitle}
                               width={this.state.chartWidth - 50} height={this.props.height}
                               variables={chart.variables}
                               minX={chart.minX}

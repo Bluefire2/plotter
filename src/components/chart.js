@@ -540,7 +540,7 @@ class Chart extends Component {
 
 Chart.defaultProps = {
     chart: 'loading...',
-    title: 'No title',
+    title: 'Untitled chart',
     minX: 0,
     maxX: 10,
     minY: 0,
