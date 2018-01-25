@@ -98,16 +98,13 @@ div.tooltip {
     background: #7386D5;
     color: #fff;
     transition: all 0.3s;
+    padding: 20px;
 }
 
 #sidebar .sidebar-header {
     padding: 20px;
     background: #6d7fcc;
-    margin-bottom: 10px;
-}
-
-#variable-input {
-    height: 150px;
+    margin: -20px -20px 10px; /* Override padding of sidebar */
 }
 
 #render-btn {

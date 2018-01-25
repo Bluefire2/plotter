@@ -7,20 +7,28 @@ class InputContainer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            variablesText: ""
+            variablesText: '',
+            title: ''
         };
     }
 
-    textareaChangeHandler(e) {
+    textareaChange(e) {
         this.setState({
             variablesText: e.target.value
+        });
+    }
+
+    titleChange(e) {
+        this.setState({
+            title: e.target.value
         });
     }
 
     renderButtonClick() {
         const text = this.state.variablesText,
             lines = text.split('\n'),
-            variables = {};
+            variables = {},
+            title = this.state.title;
 
         const removeWhitespace = string => {
             return string.replace(/ /g, '');
@@ -43,12 +51,26 @@ class InputContainer extends Component {
     }
 
     render() {
-        const placeholderValue = "X~B(10, 0.3)";
+        const placeholders = {
+            variables: 'X~B(10, 0.3)',
+            title: 'My chart'
+        };
         return (
             <div id="input-container">
-                <textarea id="variable-input" placeholder={placeholderValue}
-                          value={this.state.variablesText}
-                          onChange={this.textareaChangeHandler.bind(this)}/>
+                <div className="form-group">
+                    <label htmlFor="title-input">Title:</label>
+                    <input id="title-input" className="form-control" type="text" placeholder={placeholders.title}
+                           value={this.state.title}
+                           onChange={this.titleChange.bind(this)}/>
+                </div>
+                <br/>
+                <div className="form-group">
+                    <label htmlFor="variable-input">Variables:</label>
+                    <textarea id="variable-input" className="form-control" placeholder={placeholders.variables}
+                              rows="5"
+                              value={this.state.variablesText}
+                              onChange={this.textareaChange.bind(this)}/>
+                </div>
                 <br/>
                 <button className="btn" id="render-btn" onClick={this.renderButtonClick.bind(this)}>Render</button>
             </div>
