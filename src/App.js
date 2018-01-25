@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {version} from '../package.json';
 import './App.css';
 
 import InputContainer from './containers/input_container';
@@ -9,7 +10,7 @@ class App extends Component {
         return (
             <div className="App">
                 <header className="App-header">
-                    <h1 className="App-title">Chart renderer 2.0.0</h1>
+                    <h1 className="App-title">Chart renderer {version}</h1>
                 </header>
                 <div id="content">
                     <div id="sidebar">
