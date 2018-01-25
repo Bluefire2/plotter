@@ -76,8 +76,6 @@ class Chart extends Component {
         d3.select(`svg#${CHART_ID_CLASS}`).append("g")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
-        // TODO: render chart title near the top
-
         const defs = getRoot().append("defs").attr("class", "test"); // svg defs
 
         // arrowhead def
