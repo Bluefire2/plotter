@@ -185,13 +185,13 @@ class Chart extends Component {
 
         // draw the x axis
         getRoot().append("g")
-            .attr("class", "x axis")
+            .attr("class", `${CHART_ID_CLASS} x axis`)
             .attr("transform", `translate(${translationDistance}, ${y(0)})`)
             .call(xAxis);
 
         // draw the y axis
         getRoot().append("g")
-            .attr("class", "y axis")
+            .attr("class", `${CHART_ID_CLASS} y axis`)
             .attr("transform", "translate(" + x(0) + ", 0)")
             .call(yAxis)
             .append("text")
