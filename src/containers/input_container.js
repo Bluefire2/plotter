@@ -17,8 +17,29 @@ class InputContainer extends Component {
         });
     }
 
-    renderButtonClick(e) {
-        // TODO: write the handler
+    renderButtonClick() {
+        const text = this.state.variablesText,
+            lines = text.split('\n'),
+            variables = {};
+
+        const removeWhitespace = string => {
+            return string.replace(/ /g, '');
+        };
+
+        lines.forEach(elem => {
+            const variableNameAndValue = elem.split('~').map(removeWhitespace),
+                name = variableNameAndValue[0];
+
+            variables[name] = variableNameAndValue[1];
+        });
+
+        this.props.addChart({
+            variables,
+            minX: 0,
+            maxX: 10,
+            minY: 0,
+            maxY: 0.4
+        });
     }
 
     render() {
