@@ -79,13 +79,6 @@ class InputContainer extends Component {
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        width: state.chartWidth,
-        height: state.chartHeight
-    };
-};
-
 const mapDispatchToProps = dispatch => {
     return bindActionCreators({
         addChart,
@@ -94,4 +87,4 @@ const mapDispatchToProps = dispatch => {
     }, dispatch);
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(InputContainer);
+export default connect(null, mapDispatchToProps)(InputContainer);
