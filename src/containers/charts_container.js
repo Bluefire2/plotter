@@ -1,15 +1,41 @@
 import React, {Component} from 'react';
+import {select} from 'd3';
 import {connect} from 'react-redux';
 
 import Chart from '../components/chart';
 
 class ChartsContainer extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            chartWidth: 0
+        };
+        this.adjustChartWidth = this.adjustChartWidth.bind(this);
+    }
+
+    adjustChartWidth() {
+        const chartWidth = select('#charts').node().getBoundingClientRect().width;
+        this.setState({
+            chartWidth
+        });
+    }
+
+    componentDidMount() {
+        this.adjustChartWidth();
+        window.addEventListener('resize', this.adjustChartWidth);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.adjustChartWidth);
+    }
+
     render() {
         let chartElements;
         if(this.props.charts) {
             chartElements = this.props.charts.map((chart, index) => {
                 return <Chart key={index} chartID={index} title={chart.title}
-                              width={this.props.width} height={this.props.height}
+                              width={this.state.chartWidth - 50} height={this.props.height}
                               variables={chart.variables}
                               minX={chart.minX}
                               maxX={chart.maxX}
