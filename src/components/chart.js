@@ -18,8 +18,6 @@ import variableColors from '../colors';
  * maxX
  * minY
  * maxY
- * lt
- * rt
  */
 class Chart extends Component {
     constructor(props) {
@@ -60,8 +58,7 @@ class Chart extends Component {
         const svg = this.svg;
 
         this.updateGraph(svg, this.props.width, this.props.height,
-            minX, maxX, minY, maxY,
-            this.props.lt, this.props.rt);
+            minX, maxX, minY, maxY);
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY) {
@@ -535,9 +532,7 @@ Chart.defaultProps = {
     minX: 0,
     maxX: 10,
     minY: 0,
-    maxY: 1,
-    lt: 0,
-    rt: 1
+    maxY: 1
 };
 
 export default withFauxDOM(Chart);
