@@ -50,11 +50,15 @@ body {
 }
 
 /*
-    Title styling
+    Title and label styling
  */
 .chart-title {
     font-size: 16px;
     text-decoration: underline;
+}
+
+.y-axis-label {
+    text-anchor: end;
 }
 
 /*

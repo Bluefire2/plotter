@@ -193,12 +193,15 @@ class Chart extends Component {
         getRoot().append("g")
             .attr("class", `${CHART_ID_CLASS} y axis`)
             .attr("transform", "translate(" + x(0) + ", 0)")
-            .call(yAxis)
-            .append("text")
+            .call(yAxis);
+
+        // for some reason I can't directly append to the y-axis
+        // again, most likely some issue with react-faux-dom
+        getRoot().append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
             .attr("dy", ".71em")
-            .style("text-anchor", "end")
+            .attr("class", `${CHART_ID_CLASS} y-axis-label`)
             .text("Probability/density");
 
         if (continuousVariablesCount > 0) {
