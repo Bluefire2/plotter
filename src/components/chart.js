@@ -24,22 +24,44 @@ import variableColors from '../colors';
 class Chart extends Component {
     constructor(props) {
         super(props);
-        this.renderD3 = this.renderD3.bind(this);
-        this.faux = this.props.connectFauxDOM('div', 'chart');
-        this.ID = this.props.chartID
-    }
+        this.ID = this.props.chartID;
+        this.faux = this.props.connectFauxDOM('div', `chart${this.ID}`);
 
-    componentDidMount() {
         const width = this.props.width,
             height = this.props.height;
-
         const margin = {
             left: width / 20,
             right: width / 20,
             top: height / 20,
             bottom: height / 20
         };
-        this.renderD3(margin);
+
+        const svg = d3.select(this.faux).append('svg')
+            .attr("id", `chart${this.ID}`)
+            .attr("width", this.props.width + margin.left + margin.right)
+            .attr("height", this.props.height + margin.top + margin.bottom);
+
+        this.svg = svg;
+        this.margin = margin;
+
+        const tip = d3.select('body').append("div")
+            .attr("class", `${this.ID} tooltip`)
+            .style("opacity", 0);
+
+        this.tip = tip;
+    }
+
+    componentDidUpdate() {
+        const minX = this.props.minX,
+            maxX = this.props.maxX,
+            minY = this.props.minY,
+            maxY = this.props.maxY;
+
+        const svg = this.svg;
+
+        this.updateGraph(svg, this.props.width, this.props.height,
+            minX, maxX, minY, maxY,
+            this.props.lt, this.props.rt);
     }
 
     updateGraph(svg, width, height, minX, maxX, minY, maxY) {
@@ -48,9 +70,16 @@ class Chart extends Component {
         
         const CHART_ID = `chart${this.ID}`;
 
-        svg.selectAll("*").remove(); // clear current chart
+        // Need to have this as a function and not a variable for some reason
+        // I assume it's some issue with react-faux-dom not having full support for D3 4.x or something
+        const getRoot = () => d3.select(`svg#${CHART_ID} g`);
 
-        const defs = svg.append("defs").attr("class", "test"); // svg defs
+        d3.select(`svg#${CHART_ID}`).selectAll("*").remove(); // clear current chart
+
+        d3.select(`svg#${CHART_ID}`).append("g")
+            .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+        const defs = getRoot().append("defs").attr("class", "test"); // svg defs
 
         // arrowhead def
         defs.append("marker")
@@ -148,13 +177,13 @@ class Chart extends Component {
         const yAxis = d3.axisLeft(y);
 
         // draw the x axis
-        svg.append("g")
+        getRoot().append("g")
             .attr("class", "x axis")
             .attr("transform", `translate(${translationDistance}, ${y(0)})`)
             .call(xAxis);
 
         // draw the y axis
-        svg.append("g")
+        getRoot().append("g")
             .attr("class", "y axis")
             .attr("transform", "translate(" + x(0) + ", 0)")
             .call(yAxis)
@@ -295,9 +324,7 @@ class Chart extends Component {
         if (discreteVariablesCount > 0) {
             // tooltip div
             // I don't really want to append directly to body but it only works this way if I do
-            const tip = d3.select('body').append("div")
-                .attr("class", `${CHART_ID} tooltip`)
-                .style("opacity", 0);
+            const tip = this.tip;
 
             const minOrZero = minX < 0 ? 0 : minX;
 
@@ -433,7 +460,7 @@ class Chart extends Component {
                     mu = variable.E(),
                     normalApprox = normalPDF(mu, sigma * sigma);
 
-                svg.selectAll(barSelector)
+                getRoot().selectAll(barSelector)
                     .data(discreteData)
                     .enter().append("rect")
                     .style("fill", barColor.default)
@@ -459,7 +486,7 @@ class Chart extends Component {
 
 
                 // bar hover event handers
-                svg.selectAll(barSelector)
+                getRoot().selectAll(barSelector)
                     .on("mouseover", handleMouseOver)
                     .on("mouseout", handleMouseOut);
 
@@ -469,24 +496,24 @@ class Chart extends Component {
             // tail arrows, must be drawn after the bars to render on top of them
 
             // left open arrow and label
-            svg.append('line')
+            getRoot().append('line')
                 .attr("class", `${CHART_ID} tail-arrow left-tail-arrow open-tail-arrow`)
                 .attr("x2", translationDistance);
-            svg.append('text')
+            getRoot().append('text')
                 .attr("class", `${CHART_ID} arrow-label left-open-tail-arrow-label`);
 
             // right open arrow and label
-            svg.append('line')
+            getRoot().append('line')
                 .attr("class", `${CHART_ID} tail-arrow right-tail-arrow open-tail-arrow`)
                 .attr("x2", x(maxX) + translationDistance);
-            svg.append('text')
+            getRoot().append('text')
                 .attr("class", `${CHART_ID} arrow-label right-open-tail-arrow-label`);
 
-            svg.selectAll(".tail-arrow")
+            getRoot().selectAll(".tail-arrow")
                 .attr("marker-end", "url(#arrow-marker)")
                 .style("opacity", 0);
 
-            svg.selectAll(".arrow-label")
+            getRoot().selectAll(".arrow-label")
                 .style("opacity", 0)
                 .attr("text-anchor", "middle");
         }
@@ -494,33 +521,10 @@ class Chart extends Component {
         return true;
     };
 
-    renderD3(margin) {
-        const faux = this.faux; // the faux-dom container
-
-        const svg = d3.select(faux).append('svg')
-            .attr("id", `chart${this.ID}`)
-            .attr("width", this.props.width + margin.left + margin.right)
-            .attr("height", this.props.height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        this.svg = svg;
-
-        // plot the graph
-        const minX = this.props.minX,
-            maxX = this.props.maxX,
-            minY = this.props.minY,
-            maxY = this.props.maxY;
-
-        this.updateGraph(svg, this.props.width, this.props.height,
-            minX, maxX, minY, maxY,
-            this.props.lt, this.props.rt);
-    }
-
     render() {
         return (
             <div className="chart-container">
-                {this.props.chart}
+                {this.props[`chart${this.ID}`]}
             </div>
         );
     }
