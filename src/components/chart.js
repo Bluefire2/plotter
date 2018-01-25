@@ -65,15 +65,15 @@ class Chart extends Component {
         const faux = this.faux,
             self = this;
         
-        const CHART_ID = `chart${this.ID}`;
+        const CHART_ID_CLASS = `chart${this.ID}`;
 
         // Need to have this as a function and not a variable for some reason
         // I assume it's some issue with react-faux-dom not having full support for D3 4.x or something
-        const getRoot = () => d3.select(`svg#${CHART_ID} g`);
+        const getRoot = () => d3.select(`svg#${CHART_ID_CLASS} g`);
 
-        d3.select(`svg#${CHART_ID}`).selectAll("*").remove(); // clear current chart
+        d3.select(`svg#${CHART_ID_CLASS}`).selectAll("*").remove(); // clear current chart
 
-        d3.select(`svg#${CHART_ID}`).append("g")
+        d3.select(`svg#${CHART_ID_CLASS}`).append("g")
             .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
         // TODO: render chart title near the top
@@ -92,6 +92,14 @@ class Chart extends Component {
             .append("path")
             .attr("d", "M0, -5L10, 0L0, 5")
             .attr("class", "arrow-head");
+
+        // add title to graph
+        getRoot().append("text")
+            .attr("class", `${CHART_ID_CLASS} chart-title`)
+            .attr("x", (width / 2))
+            .attr("y", height / 20)
+            .attr("text-anchor", "middle")
+            .text(this.props.title);
 
         function variableIsDiscrete(variable) {
             // TODO: rewrite the entire distributions spec to make all variables extend a superclass
@@ -340,9 +348,9 @@ class Chart extends Component {
                 const barColor = variableColors[value.color],
                     xShift = (barWidth + barSpacing) * count;
 
-                const barClassName = `${CHART_ID} bar i${count}`,
-                    barSelector = `.${CHART_ID}.bar.i${count}`,
-                    barId = ({variableIndex, index}) => `${CHART_ID}bar${index}i${variableIndex}`;
+                const barClassName = `${CHART_ID_CLASS} bar i${count}`,
+                    barSelector = `.${CHART_ID_CLASS}.bar.i${count}`,
+                    barId = ({variableIndex, index}) => `${CHART_ID_CLASS}bar${index}i${variableIndex}`;
 
                 /*
                  * Bars need to have IDs, this is because react-faux-dom is weird with `this` in event listeners, which
@@ -376,16 +384,16 @@ class Chart extends Component {
                                 .text(labelText);
                         }
 
-                        d3.selectAll(`.${CHART_ID}.tail-arrow`)
+                        d3.selectAll(`.${CHART_ID_CLASS}.tail-arrow`)
                             .style("opacity", 1);
 
-                        d3.selectAll(`.${CHART_ID}.arrow-label`)
+                        d3.selectAll(`.${CHART_ID_CLASS}.arrow-label`)
                             .style("opacity", 1);
 
                         // left open arrow
                         positionArrowAndLabel(
-                            d3.select(`.${CHART_ID}.left-tail-arrow.open-tail-arrow`),
-                            d3.select(`.${CHART_ID}.left-open-tail-arrow-label`),
+                            d3.select(`.${CHART_ID_CLASS}.left-tail-arrow.open-tail-arrow`),
+                            d3.select(`.${CHART_ID_CLASS}.left-open-tail-arrow-label`),
                             coordinates.x,
                             coordinates.y - aboveBarBy,
                             leftOpenTailValue
@@ -393,18 +401,18 @@ class Chart extends Component {
 
                         // right open arrow
                         positionArrowAndLabel(
-                            d3.select(`.${CHART_ID}.right-tail-arrow.open-tail-arrow`),
-                            d3.select(`.${CHART_ID}.right-open-tail-arrow-label`),
+                            d3.select(`.${CHART_ID_CLASS}.right-tail-arrow.open-tail-arrow`),
+                            d3.select(`.${CHART_ID_CLASS}.right-open-tail-arrow-label`),
                             coordinates.x + setWidth,
                             coordinates.y - aboveBarBy,
                             rightOpenTailValue
                         );
                     } else {
                         // make all arrows invisible
-                        d3.selectAll(`.${CHART_ID}.tail-arrow`)
+                        d3.selectAll(`.${CHART_ID_CLASS}.tail-arrow`)
                             .style("opacity", 0);
 
-                        d3.selectAll(`.${CHART_ID}.arrow-label`)
+                        d3.selectAll(`.${CHART_ID_CLASS}.arrow-label`)
                             .style("opacity", 0);
                     }
                 }
@@ -496,17 +504,17 @@ class Chart extends Component {
 
             // left open arrow and label
             getRoot().append('line')
-                .attr("class", `${CHART_ID} tail-arrow left-tail-arrow open-tail-arrow`)
+                .attr("class", `${CHART_ID_CLASS} tail-arrow left-tail-arrow open-tail-arrow`)
                 .attr("x2", translationDistance);
             getRoot().append('text')
-                .attr("class", `${CHART_ID} arrow-label left-open-tail-arrow-label`);
+                .attr("class", `${CHART_ID_CLASS} arrow-label left-open-tail-arrow-label`);
 
             // right open arrow and label
             getRoot().append('line')
-                .attr("class", `${CHART_ID} tail-arrow right-tail-arrow open-tail-arrow`)
+                .attr("class", `${CHART_ID_CLASS} tail-arrow right-tail-arrow open-tail-arrow`)
                 .attr("x2", x(maxX) + translationDistance);
             getRoot().append('text')
-                .attr("class", `${CHART_ID} arrow-label right-open-tail-arrow-label`);
+                .attr("class", `${CHART_ID_CLASS} arrow-label right-open-tail-arrow-label`);
 
             getRoot().selectAll(".tail-arrow")
                 .attr("marker-end", "url(#arrow-marker)")

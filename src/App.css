@@ -50,6 +50,14 @@ body {
 }
 
 /*
+    Title styling
+ */
+.chart-title {
+    font-size: 16px;
+    text-decoration: underline;
+}
+
+/*
     Tooltip styling
  */
 div.tooltip {
