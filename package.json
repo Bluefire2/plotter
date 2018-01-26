@@ -1,6 +1,6 @@
 {
   "name": "plotter",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "private": true,
   "homepage": "http://bluefire2.github.io/plotter",
   "dependencies": {

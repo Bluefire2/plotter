@@ -64,7 +64,7 @@ class Chart extends Component {
     updateGraph(svg, width, height, minX, maxX, minY, maxY) {
         const faux = this.faux,
             self = this;
-        
+
         const CHART_ID_CLASS = `chart${this.ID}`;
 
         // Need to have this as a function and not a variable for some reason
@@ -90,14 +90,6 @@ class Chart extends Component {
             .append("path")
             .attr("d", "M0, -5L10, 0L0, 5")
             .attr("class", "arrow-head");
-
-        // add title to graph
-        getRoot().append("text")
-            .attr("class", `${CHART_ID_CLASS} chart-title`)
-            .attr("x", (width / 2))
-            .attr("y", height / 20)
-            .attr("text-anchor", "middle")
-            .text(this.props.title);
 
         function variableIsDiscrete(variable) {
             // TODO: rewrite the entire distributions spec to make all variables extend a superclass
@@ -201,131 +193,6 @@ class Chart extends Component {
             .attr("dy", ".71em")
             .attr("class", `${CHART_ID_CLASS} y-axis-label`)
             .text("Probability/density");
-
-        if (continuousVariablesCount > 0) {
-            // we have continuous variables defined
-            const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
-                d3.select(faux).selectAll(".graph-line").remove(); // remove the current lines
-
-                // line function
-                const line = d3.line()
-                    .x(function (d) {
-                        return x(d.x);
-                    })
-                    .y(function (d) {
-                        return y(d.y);
-                    })
-                    .curve(d3.curveBasis);
-
-                const xArray = d3.range((+xDomain[0]), (+xDomain[xDomain.length - 1] + 0.5), 0.1),
-                    animationLength = 500;
-                _.forOwn(variables, (value, variableName) => {
-                    // determine the pdf function for the variable
-                    let pdf;
-                    if (typeof value.variable === "string") {
-                        // the variable is already a pdf
-                        pdf = value.variable;
-                    } else {
-                        // we need to extract the pdf
-                        pdf = value.variable.PDFformula;
-                    }
-                    const pdfFunction = x => math.eval(pdf, {x}),
-                        color = variableColors[value.color]; // the colour to draw the line with
-
-                    // create the data series for the variable (the cartesian co-ordinates for the line)
-                    const data = xArray.map(x => {
-                        return {
-                            x: x,
-                            // evaluate y for the given x
-                            y: pdfFunction(x)
-                        };
-                    });
-
-                    // use the data series to draw the path
-                    svg.append("path")
-                        .datum(data)
-                        .attr("class", "graph-line")
-                        .attr("class", "line")
-                        .attr("transform", `translate(${translationDistance}, 0)`) // need to translate the path right since the x-axis is shifted
-                        .style("stroke", color.default)
-                        .attr("d", line);
-                });
-
-                // function tweenDash() {
-                //     const l = this.getTotalLength(),
-                //         i = d3.interpolateString("0," + l, l + "," + l);
-                //     return function (t) {
-                //         return i(t);
-                //     };
-                // }
-                //
-                // function transition(path) {
-                //     path.transition()
-                //         .duration(animationLength)
-                //         .attrTween("stroke-dasharray", tweenDash);
-                // }
-
-                // // put in tails
-                // const rightTailPolygon = [],
-                //     leftTailPolygon = [];
-                // data[0].forEach(elem => {
-                //     if (elem.x <= tailsZ[0]) {
-                //         leftTailPolygon.push(elem);
-                //     } else if (elem.x >= tailsZ[1]) {
-                //         rightTailPolygon.push(elem);
-                //     } else {
-                //         return false;
-                //     }
-                // });
-                // leftTailPolygon.push({x: tailsZ[0], y: tailsY[0]}, {x: tailsZ[0], y: 0}, {x: 0, y: 0});
-                // rightTailPolygon.unshift({x: 0, y: 0}, {x: tailsZ[1], y: 0}, {x: tailsZ[1], y: tailsY[1]}); // it hurts my eyes
-                //
-                // setTimeout(() => {
-                //     if (isBetween(tails[0], 0, 1) && isBetween(tailsZ[0], minX, maxX)) {
-                //         svg.append("polygon")
-                //             .attr({
-                //                 points: matrixToPolygonPoints(leftTailPolygon, x, y),
-                //                 id: "leftTail",
-                //                 "class": "tail"
-                //             });
-                //     }
-                //     if (isBetween(tails[1], 0, 1) && isBetween(tailsZ[1], minX, maxX)) {
-                //         svg.append("polygon")
-                //             .attr({
-                //                 points: matrixToPolygonPoints(rightTailPolygon, x, y),
-                //                 id: "rightTail",
-                //                 "class": "tail"
-                //             });
-                //     }
-                //     svg.selectAll(".tail")
-                //         .style({
-                //             opacity: 0.5,
-                //             fill: "red"
-                //         })
-                //         .on("mouseover", function () {
-                //             const self = d3.select(this),
-                //                 side = self.attr("id").slice(0, -4),
-                //                 popupId = self.attr("id") + "Popup";
-                //
-                //             self.style("opacity", 0.7);
-                //             // TODO: write code for popup showing the tail's z-value
-                //             // svg.append (TBC)
-                //         })
-                //         .on("mouseout", function () {
-                //             const self = d3.select(this),
-                //                 side = self.attr("id").slice(0, -4),
-                //                 popupId = self.attr("id") + "Popup";
-                //
-                //             self.style("opacity", 0.5);
-                //             d3.selectAll(".tailPopup") // for the future
-                //                 .remove();
-                //         });
-                // }, animationLength);
-            };
-
-            // now we plot the PDFs
-            drawContinuousVariablePDFs(continuousVariables, xDomain, x, y);
-        }
 
         // make bar chart rectangles
         // only do this if we have discrete variables:
@@ -500,8 +367,135 @@ class Chart extends Component {
 
                 count++;
             });
+        }
 
-            // tail arrows, must be drawn after the bars to render on top of them
+        if (continuousVariablesCount > 0) {
+            // we have continuous variables defined
+            const drawContinuousVariablePDFs = (variables, xDomain, x, y, tails, tailsZ, tailsY) => {
+                getRoot().selectAll(".graph-line").remove(); // remove the current lines
+
+                // line function
+                const line = d3.line()
+                    .x(function (d) {
+                        return x(d.x);
+                    })
+                    .y(function (d) {
+                        return y(d.y);
+                    })
+                    .curve(d3.curveBasis);
+
+                const xArray = d3.range((+xDomain[0]), (+xDomain[xDomain.length - 1] + 0.5), 0.1),
+                    animationLength = 500;
+                _.forOwn(variables, (value, variableName) => {
+                    // determine the pdf function for the variable
+                    let pdf;
+                    if (typeof value.variable === "string") {
+                        // the variable is already a pdf
+                        pdf = value.variable;
+                    } else {
+                        // we need to extract the pdf
+                        pdf = value.variable.PDFformula;
+                    }
+                    const pdfFunction = x => math.eval(pdf, {x}),
+                        color = variableColors[value.color]; // the colour to draw the line with
+
+                    // create the data series for the variable (the cartesian co-ordinates for the line)
+                    const data = xArray.map(x => {
+                        return {
+                            x: x,
+                            // evaluate y for the given x
+                            y: pdfFunction(x)
+                        };
+                    });
+
+                    // use the data series to draw the path
+                    getRoot().append("path")
+                        .datum(data)
+                        .attr("class", "graph-line")
+                        .attr("class", "line")
+                        .attr("transform", `translate(${translationDistance}, 0)`) // need to translate the path right since the x-axis is shifted
+                        .style("stroke", color.default)
+                        .attr("d", line);
+                });
+
+                // function tweenDash() {
+                //     const l = this.getTotalLength(),
+                //         i = d3.interpolateString("0," + l, l + "," + l);
+                //     return function (t) {
+                //         return i(t);
+                //     };
+                // }
+                //
+                // function transition(path) {
+                //     path.transition()
+                //         .duration(animationLength)
+                //         .attrTween("stroke-dasharray", tweenDash);
+                // }
+
+                // // put in tails
+                // const rightTailPolygon = [],
+                //     leftTailPolygon = [];
+                // data[0].forEach(elem => {
+                //     if (elem.x <= tailsZ[0]) {
+                //         leftTailPolygon.push(elem);
+                //     } else if (elem.x >= tailsZ[1]) {
+                //         rightTailPolygon.push(elem);
+                //     } else {
+                //         return false;
+                //     }
+                // });
+                // leftTailPolygon.push({x: tailsZ[0], y: tailsY[0]}, {x: tailsZ[0], y: 0}, {x: 0, y: 0});
+                // rightTailPolygon.unshift({x: 0, y: 0}, {x: tailsZ[1], y: 0}, {x: tailsZ[1], y: tailsY[1]}); // it hurts my eyes
+                //
+                // setTimeout(() => {
+                //     if (isBetween(tails[0], 0, 1) && isBetween(tailsZ[0], minX, maxX)) {
+                //         svg.append("polygon")
+                //             .attr({
+                //                 points: matrixToPolygonPoints(leftTailPolygon, x, y),
+                //                 id: "leftTail",
+                //                 "class": "tail"
+                //             });
+                //     }
+                //     if (isBetween(tails[1], 0, 1) && isBetween(tailsZ[1], minX, maxX)) {
+                //         svg.append("polygon")
+                //             .attr({
+                //                 points: matrixToPolygonPoints(rightTailPolygon, x, y),
+                //                 id: "rightTail",
+                //                 "class": "tail"
+                //             });
+                //     }
+                //     svg.selectAll(".tail")
+                //         .style({
+                //             opacity: 0.5,
+                //             fill: "red"
+                //         })
+                //         .on("mouseover", function () {
+                //             const self = d3.select(this),
+                //                 side = self.attr("id").slice(0, -4),
+                //                 popupId = self.attr("id") + "Popup";
+                //
+                //             self.style("opacity", 0.7);
+                //             // TODO: write code for popup showing the tail's z-value
+                //             // svg.append (TBC)
+                //         })
+                //         .on("mouseout", function () {
+                //             const self = d3.select(this),
+                //                 side = self.attr("id").slice(0, -4),
+                //                 popupId = self.attr("id") + "Popup";
+                //
+                //             self.style("opacity", 0.5);
+                //             d3.selectAll(".tailPopup") // for the future
+                //                 .remove();
+                //         });
+                // }, animationLength);
+            };
+
+            // now we plot the PDFs
+            drawContinuousVariablePDFs(continuousVariables, xDomain, x, y);
+        }
+
+        if (discreteVariablesCount > 0) {
+            // tail arrows, must be drawn after the bars AND continuous variable lines to render on top of them
 
             // left open arrow and label
             getRoot().append('line')
@@ -525,6 +519,15 @@ class Chart extends Component {
                 .style("opacity", 0)
                 .attr("text-anchor", "middle");
         }
+
+        // add title to graph
+        // must be done last to render above everything
+        getRoot().append("text")
+            .attr("class", `${CHART_ID_CLASS} chart-title`)
+            .attr("x", (width / 2))
+            .attr("y", height / 20)
+            .attr("text-anchor", "middle")
+            .text(this.props.title);
 
         return true;
     };
