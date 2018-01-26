@@ -527,7 +527,7 @@ class Chart extends Component {
             .attr("x", (width / 2))
             .attr("y", height / 20)
             .attr("text-anchor", "middle")
-            .text(this.props.title);
+            .text(this.props.title.toUpperCase());
 
         return true;
     };
