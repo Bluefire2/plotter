@@ -25,7 +25,7 @@ class App extends Component {
         return (
             <div className="App">
                 <header className="App-header">
-                    <h1 className="App-title">Chart renderer {version}</h1>
+                    <h1 className="App-title">Chart plotter {version}</h1>
                 </header>
                 <div id="content">
                     <div id="sidebar">
