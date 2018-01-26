@@ -32,6 +32,16 @@ body {
     flex-grow: 100;
 }
 
+#bottom-right-corner {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.made-with-logo {
+    height: 40px;
+}
+
 /*
   Bar chart styling
  */

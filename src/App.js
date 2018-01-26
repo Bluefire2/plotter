@@ -2,11 +2,26 @@ import React, {Component} from 'react';
 import {version} from '../package.json';
 import './App.css';
 
+import d3logo from './images/d3logo.svg';
+import reactlogo from './images/reactlogo.svg';
+
+import MadeWith from './components/madewith';
+
 import InputContainer from './containers/input_container';
 import ChartsContainer from './containers/charts_container';
 
 class App extends Component {
     render() {
+        const frameworkLogos = [
+            {
+                image: d3logo,
+                href: 'https://d3js.org/'
+            },
+            {
+                image: reactlogo,
+                href: 'https://reactjs.org/'
+            }
+        ];
         return (
             <div className="App">
                 <header className="App-header">
@@ -20,6 +35,9 @@ class App extends Component {
                         <InputContainer/>
                     </div>
                     <ChartsContainer/>
+                </div>
+                <div id="bottom-right-corner">
+                    <MadeWith logos={frameworkLogos}/>
                 </div>
             </div>
         );
