@@ -4,7 +4,7 @@ import * as math from 'mathjs';
 import * as _ from 'lodash';
 import {withFauxDOM} from 'react-faux-dom';
 
-import {parseVariable} from '../distributions';
+import {parseVariable} from '../dist/parse_variable';
 import variableColors from '../colors';
 
 /**
@@ -238,7 +238,7 @@ class Chart extends Component {
                         const aboveBarBy = height / 20;
 
                         const leftOpenTailValue = round3DP(variable.lessThan(d.value)),
-                            rightOpenTailValue = round3DP(variable.moreThan(d.value));
+                            rightOpenTailValue = round3DP(variable.greaterThan(d.value));
 
                         function positionArrowAndLabel(arrow, label, x, y, labelText) {
                             arrow.attr("x1", x)
@@ -331,8 +331,8 @@ class Chart extends Component {
                     }
                 }
 
-                const sigma = Math.sqrt(variable.Var()),
-                    mu = variable.E(),
+                const sigma = Math.sqrt(variable.variance),
+                    mu = variable.exp,
                     normalApprox = normalPDF(mu, sigma * sigma);
 
                 getRoot().selectAll(barSelector)
@@ -394,7 +394,7 @@ class Chart extends Component {
                         pdf = value.variable;
                     } else {
                         // we need to extract the pdf
-                        pdf = value.variable.PDFformula;
+                        pdf = value.variable.pdfFormula;
                     }
                     const pdfFunction = x => math.eval(pdf, {x}),
                         color = variableColors[value.color]; // the colour to draw the line with
