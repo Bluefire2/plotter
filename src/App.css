@@ -137,3 +137,7 @@ div.tooltip {
 #render-btn {
     margin: 10px;
 }
+
+#variable-input {
+    height: 150px;
+}
