@@ -43,12 +43,10 @@ class InputContainer extends Component {
     }
 
     onSubmit(values) {
-        console.log(values);
         const title = values.title,
             variables = parseOutVariables(values.variables),
             {minX, maxX, minY, maxY} = values.domain ? parseOutDomain(values.domain) : DEFAULT_DOMAIN;
 
-        console.log(variables, minX, maxX, minY, maxY);
         this.props.addChart({
             title,
             variables,
