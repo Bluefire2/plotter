@@ -15,7 +15,8 @@ class ChartsContainer extends Component {
     }
 
     adjustChartWidth() {
-        const chartWidth = select('#charts').node().getBoundingClientRect().width;
+        // TODO: there's probably a smarter way than just subtracting a flat 150 from the chart width
+        const chartWidth = select('#charts').node().getBoundingClientRect().width - 150;
         this.setState({
             chartWidth
         });
@@ -35,8 +36,9 @@ class ChartsContainer extends Component {
         if(this.props.charts) {
             chartElements = this.props.charts.map((chart, index) => {
                 const chartTitle = chart.title === '' ? 'Untitled chart' : chart.title;
+
                 return <Chart key={index} chartID={index} title={chartTitle}
-                              width={this.state.chartWidth - 50} height={this.props.height}
+                              width={this.state.chartWidth} height={this.props.height}
                               variables={chart.variables}
                               minX={chart.minX}
                               maxX={chart.maxX}
