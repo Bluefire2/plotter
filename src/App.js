@@ -4,6 +4,7 @@ import './App.css';
 
 import d3logo from './images/d3logo.svg';
 import reactlogo from './images/reactlogo.svg';
+import reduxlogo from './images/reduxlogo.svg';
 
 import MadeWith from './components/madewith';
 
@@ -20,6 +21,10 @@ class App extends Component {
             {
                 image: reactlogo,
                 href: 'https://reactjs.org/'
+            },
+            {
+                image: reduxlogo,
+                href: 'https://redux.js.org/'
             }
         ];
         return (
