@@ -31,7 +31,7 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <h1 className="App-title">Distribution chart plotter v{version}</h1>
-                    <h2 className="source-title"><a href="https://bluefire2.github.io/plotter">View source on github</a></h2>
+                    <h2 className="source-title"><a href="https://github.com/Bluefire2/plotter">View source on github</a></h2>
                 </header>
                 <div id="content">
                     <div id="sidebar">
