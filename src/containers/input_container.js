@@ -61,7 +61,7 @@ class InputContainer extends Component {
         const {handleSubmit} = this.props;
         const placeholders = {
             title: 'My chart',
-            variables: 'X~B(10, 0.3)',
+            variables: 'X~B(10, 0.3)\nY~Po(4)',
             domain: '0, 10, 0, 0.4'
         };
         return (
