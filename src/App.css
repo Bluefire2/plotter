@@ -19,6 +19,10 @@ body {
     font-size: 1.5em;
 }
 
+.source-title {
+    font-size: 1em;
+}
+
 .App-intro {
     font-size: large;
 }
